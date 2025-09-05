@@ -1,11 +1,31 @@
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { StatCard } from "@/components/ui/stat-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Users, FileText, Trophy, DollarSign, Calendar, Clock, AlertTriangle, TrendingUp } from "lucide-react";
+import { 
+  Users, 
+  FileText, 
+  Trophy, 
+  DollarSign, 
+  Calendar, 
+  Clock, 
+  TrendingUp,
+  Plus,
+  FileCheck,
+  UserPlus,
+  ClipboardCheck,
+  Calculator
+} from "lucide-react";
+import QuickApplicationForm from "@/components/forms/QuickApplicationForm";
+import AddResearcherForm from "@/components/forms/AddResearcherForm";
+import ReviewAwardForm from "@/components/forms/ReviewAwardForm";
+import FinancialReportForm from "@/components/forms/FinancialReportForm";
 
 export default function Dashboard() {
+  const [openDialog, setOpenDialog] = useState<string | null>(null);
   const canonical = typeof window !== 'undefined' ? window.location.href : '';
   
   const stats = [
@@ -201,28 +221,76 @@ export default function Dashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5" />
+              <Plus className="h-5 w-5" />
               Quick Actions
             </CardTitle>
+            <CardDescription>Frequently used actions with staff ID integration</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-3 md:grid-cols-4">
-              <Button className="h-20 flex-col gap-2">
-                <FileText className="h-5 w-5" />
-                New Application
-              </Button>
-              <Button variant="outline" className="h-20 flex-col gap-2">
-                <Users className="h-5 w-5" />
-                Add Researcher
-              </Button>
-              <Button variant="outline" className="h-20 flex-col gap-2">
-                <Trophy className="h-5 w-5" />
-                Review Award
-              </Button>
-              <Button variant="outline" className="h-20 flex-col gap-2">
-                <DollarSign className="h-5 w-5" />
-                Financial Report
-              </Button>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              <Dialog open={openDialog === "application"} onOpenChange={(open) => setOpenDialog(open ? "application" : null)}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="h-auto flex-col gap-2 p-4">
+                    <FileCheck className="h-6 w-6" />
+                    <span className="text-sm">New Application</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Submit New Research Application</DialogTitle>
+                    <DialogDescription>Submit a new research funding application using your staff ID</DialogDescription>
+                  </DialogHeader>
+                  <QuickApplicationForm onCancel={() => setOpenDialog(null)} />
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={openDialog === "researcher"} onOpenChange={(open) => setOpenDialog(open ? "researcher" : null)}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="h-auto flex-col gap-2 p-4">
+                    <UserPlus className="h-6 w-6" />
+                    <span className="text-sm">Add Researcher</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Add New Researcher</DialogTitle>
+                    <DialogDescription>Register a new researcher in the system</DialogDescription>
+                  </DialogHeader>
+                  <AddResearcherForm onCancel={() => setOpenDialog(null)} />
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={openDialog === "review"} onOpenChange={(open) => setOpenDialog(open ? "review" : null)}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="h-auto flex-col gap-2 p-4">
+                    <ClipboardCheck className="h-6 w-6" />
+                    <span className="text-sm">Review Award</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Submit Award Review</DialogTitle>
+                    <DialogDescription>Submit your review and evaluation for an award application</DialogDescription>
+                  </DialogHeader>
+                  <ReviewAwardForm onCancel={() => setOpenDialog(null)} />
+                </DialogContent>
+              </Dialog>
+
+              <Dialog open={openDialog === "financial"} onOpenChange={(open) => setOpenDialog(open ? "financial" : null)}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="h-auto flex-col gap-2 p-4">
+                    <Calculator className="h-6 w-6" />
+                    <span className="text-sm">Financial Report</span>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Submit Financial Report</DialogTitle>
+                    <DialogDescription>Submit financial reporting for your research project</DialogDescription>
+                  </DialogHeader>
+                  <FinancialReportForm onCancel={() => setOpenDialog(null)} />
+                </DialogContent>
+              </Dialog>
             </div>
           </CardContent>
         </Card>
