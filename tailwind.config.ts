@@ -61,6 +61,13 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// University of Ghana brand colors
+				ug: {
+					blue: 'hsl(var(--ug-blue))',
+					'blue-light': 'hsl(var(--ug-blue-light))',
+					gold: 'hsl(var(--ug-gold))',
+					'gold-light': 'hsl(var(--ug-gold-light))'
 				}
 			},
 			borderRadius: {
