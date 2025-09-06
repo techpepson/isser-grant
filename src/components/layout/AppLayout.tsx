@@ -16,7 +16,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
                   <span className="text-white font-bold text-sm">UG</span>
                 </div>
                 <div>
-                  <h1 className="font-semibold text-foreground">Research Portal</h1>
+                  <h1 className="font-semibold text-foreground">ISSER Research Portal</h1>
                   <p className="text-xs text-muted-foreground">University of Ghana</p>
                 </div>
               </div>
