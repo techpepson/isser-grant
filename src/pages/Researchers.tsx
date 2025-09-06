@@ -6,10 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Search, Filter, UserPlus, Mail, ExternalLink, BookOpen, Award } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import AddResearcherForm from "@/components/forms/AddResearcherForm";
 
 export default function Researchers() {
   const canonical = typeof window !== 'undefined' ? window.location.href : '';
   const [searchTerm, setSearchTerm] = useState("");
+  const [openAddDialog, setOpenAddDialog] = useState(false);
 
   const researchers = [
     {
@@ -130,10 +133,21 @@ export default function Researchers() {
               <Filter className="h-4 w-4 mr-2" />
               Filter
             </Button>
-            <Button size="sm">
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add Researcher
-            </Button>
+            <Dialog open={openAddDialog} onOpenChange={setOpenAddDialog}>
+              <DialogTrigger asChild>
+                <Button size="sm">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Add Researcher
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Add New Researcher</DialogTitle>
+                  <DialogDescription>Register a new researcher in the system.</DialogDescription>
+                </DialogHeader>
+                <AddResearcherForm onCancel={() => setOpenAddDialog(false)} onSubmit={() => setOpenAddDialog(false)} />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
