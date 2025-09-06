@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Search, 
   Filter, 
@@ -20,10 +21,12 @@ import {
   Target,
   ExternalLink
 } from "lucide-react";
+import NewAwardForm from "@/components/forms/NewAwardForm";
 
 export default function Awards() {
   const canonical = typeof window !== 'undefined' ? window.location.href : '';
   const [searchTerm, setSearchTerm] = useState("");
+  const [openNewAwardDialog, setOpenNewAwardDialog] = useState(false);
 
   const awards = [
     {
@@ -187,10 +190,21 @@ export default function Awards() {
               <Filter className="h-4 w-4 mr-2" />
               Filter
             </Button>
-            <Button size="sm">
-              <Trophy className="h-4 w-4 mr-2" />
-              New Award
-            </Button>
+            <Dialog open={openNewAwardDialog} onOpenChange={setOpenNewAwardDialog}>
+              <DialogTrigger asChild>
+                <Button size="sm">
+                  <Trophy className="h-4 w-4 mr-2" />
+                  New Award
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Create New Award</DialogTitle>
+                  <DialogDescription>Create a new research award from an approved application.</DialogDescription>
+                </DialogHeader>
+                <NewAwardForm onCancel={() => setOpenNewAwardDialog(false)} onSubmit={() => setOpenNewAwardDialog(false)} />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 

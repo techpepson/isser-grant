@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { 
   Search, 
   Filter, 
@@ -19,10 +20,12 @@ import {
   XCircle,
   AlertCircle
 } from "lucide-react";
+import QuickApplicationForm from "@/components/forms/QuickApplicationForm";
 
 export default function Applications() {
   const canonical = typeof window !== 'undefined' ? window.location.href : '';
   const [searchTerm, setSearchTerm] = useState("");
+  const [openNewAppDialog, setOpenNewAppDialog] = useState(false);
 
   const applications = [
     {
@@ -210,10 +213,21 @@ export default function Applications() {
               <Filter className="h-4 w-4 mr-2" />
               Filter
             </Button>
-            <Button size="sm">
-              <FileText className="h-4 w-4 mr-2" />
-              New Application
-            </Button>
+            <Dialog open={openNewAppDialog} onOpenChange={setOpenNewAppDialog}>
+              <DialogTrigger asChild>
+                <Button size="sm">
+                  <FileText className="h-4 w-4 mr-2" />
+                  New Application
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Submit New Research Application</DialogTitle>
+                  <DialogDescription>Submit a new research funding application using your staff ID.</DialogDescription>
+                </DialogHeader>
+                <QuickApplicationForm onCancel={() => setOpenNewAppDialog(false)} onSubmit={() => setOpenNewAppDialog(false)} />
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
