@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CalendarView } from "@/components/calendar/CalendarView";
 import { 
   Users, 
   FileText, 
@@ -210,9 +211,20 @@ export default function Dashboard() {
                   </div>
                 ))}
               </div>
-              <Button variant="outline" className="w-full mt-4">
-                View Calendar
-              </Button>
+              <Dialog open={openDialog === "calendar"} onOpenChange={(open) => setOpenDialog(open ? "calendar" : null)}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" className="w-full mt-4">
+                    View Calendar
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Research Calendar</DialogTitle>
+                    <DialogDescription>View upcoming deadlines, meetings, and research events</DialogDescription>
+                  </DialogHeader>
+                  <CalendarView />
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </div>
