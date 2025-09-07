@@ -5,14 +5,24 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Search, Filter, UserPlus, Mail, ExternalLink, BookOpen, Award } from "lucide-react";
+import { Search, Filter, UserPlus, Mail, ExternalLink, BookOpen, Award, X } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import AddResearcherForm from "@/components/forms/AddResearcherForm";
 
 export default function Researchers() {
   const canonical = typeof window !== 'undefined' ? window.location.href : '';
   const [searchTerm, setSearchTerm] = useState("");
   const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [openFilterDialog, setOpenFilterDialog] = useState(false);
+  
+  // Filter states
+  const [selectedDepartments, setSelectedDepartments] = useState<string[]>([]);
+  const [selectedExpertise, setSelectedExpertise] = useState<string[]>([]);
+  const [fundingRange, setFundingRange] = useState<string>("");
+  const [projectCount, setProjectCount] = useState<string>("");
 
   const researchers = [
     {
@@ -95,11 +105,92 @@ export default function Researchers() {
     }
   ];
 
-  const filteredResearchers = researchers.filter(researcher =>
-    researcher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    researcher.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    researcher.expertise.some(exp => exp.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Get unique departments and expertise for filter options
+  const allDepartments = [...new Set(researchers.map(r => r.department))];
+  const allExpertise = [...new Set(researchers.flatMap(r => r.expertise))];
+
+  const parseAmount = (amount: string) => {
+    return parseInt(amount.replace(/[$,]/g, ''));
+  };
+
+  const filteredResearchers = researchers.filter(researcher => {
+    // Search filter
+    const matchesSearch = researcher.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      researcher.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      researcher.expertise.some(exp => exp.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    // Department filter
+    const matchesDepartment = selectedDepartments.length === 0 || 
+      selectedDepartments.includes(researcher.department);
+
+    // Expertise filter
+    const matchesExpertise = selectedExpertise.length === 0 ||
+      researcher.expertise.some(exp => selectedExpertise.includes(exp));
+
+    // Funding range filter
+    let matchesFunding = true;
+    if (fundingRange) {
+      const funding = parseAmount(researcher.totalFunding);
+      switch (fundingRange) {
+        case "under-100k":
+          matchesFunding = funding < 100000;
+          break;
+        case "100k-300k":
+          matchesFunding = funding >= 100000 && funding <= 300000;
+          break;
+        case "300k-500k":
+          matchesFunding = funding >= 300000 && funding <= 500000;
+          break;
+        case "over-500k":
+          matchesFunding = funding > 500000;
+          break;
+      }
+    }
+
+    // Project count filter
+    let matchesProjects = true;
+    if (projectCount) {
+      switch (projectCount) {
+        case "1-2":
+          matchesProjects = researcher.activeProjects >= 1 && researcher.activeProjects <= 2;
+          break;
+        case "3-4":
+          matchesProjects = researcher.activeProjects >= 3 && researcher.activeProjects <= 4;
+          break;
+        case "5+":
+          matchesProjects = researcher.activeProjects >= 5;
+          break;
+      }
+    }
+
+    return matchesSearch && matchesDepartment && matchesExpertise && matchesFunding && matchesProjects;
+  });
+
+  const clearFilters = () => {
+    setSelectedDepartments([]);
+    setSelectedExpertise([]);
+    setFundingRange("");
+    setProjectCount("");
+  };
+
+  const hasActiveFilters = selectedDepartments.length > 0 || selectedExpertise.length > 0 || 
+    fundingRange || projectCount;
+
+  const handleDepartmentChange = (department: string, checked: boolean) => {
+    if (checked) {
+      setSelectedDepartments(prev => [...prev, department]);
+    } else {
+      setSelectedDepartments(prev => prev.filter(d => d !== department));
+    }
+  };
+
+  const handleExpertiseChange = (expertise: string, checked: boolean) => {
+    if (checked) {
+      setSelectedExpertise(prev => [...prev, expertise]);
+    } else {
+      setSelectedExpertise(prev => prev.filter(e => e !== expertise));
+    }
+  };
 
   return (
     <>
@@ -129,10 +220,112 @@ export default function Researchers() {
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
+            <Dialog open={openFilterDialog} onOpenChange={setOpenFilterDialog}>
+              <DialogTrigger asChild>
+                <Button variant={hasActiveFilters ? "default" : "outline"} size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                  {hasActiveFilters && (
+                    <Badge variant="secondary" className="ml-2 text-xs">
+                      {selectedDepartments.length + selectedExpertise.length + 
+                       (fundingRange ? 1 : 0) + (projectCount ? 1 : 0)}
+                    </Badge>
+                  )}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Filter Researchers</DialogTitle>
+                  <DialogDescription>Filter researchers by department, expertise, and more.</DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-6">
+                  {/* Departments */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Department</Label>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {allDepartments.map(department => (
+                        <div key={department} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`dept-${department}`}
+                            checked={selectedDepartments.includes(department)}
+                            onCheckedChange={(checked) => 
+                              handleDepartmentChange(department, checked as boolean)
+                            }
+                          />
+                          <Label htmlFor={`dept-${department}`} className="text-sm">
+                            {department}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Expertise */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Expertise</Label>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {allExpertise.map(expertise => (
+                        <div key={expertise} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`exp-${expertise}`}
+                            checked={selectedExpertise.includes(expertise)}
+                            onCheckedChange={(checked) => 
+                              handleExpertiseChange(expertise, checked as boolean)
+                            }
+                          />
+                          <Label htmlFor={`exp-${expertise}`} className="text-sm">
+                            {expertise}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Funding Range */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Total Funding</Label>
+                    <Select value={fundingRange} onValueChange={setFundingRange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select funding range" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="under-100k">Under $100K</SelectItem>
+                        <SelectItem value="100k-300k">$100K - $300K</SelectItem>
+                        <SelectItem value="300k-500k">$300K - $500K</SelectItem>
+                        <SelectItem value="over-500k">Over $500K</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Project Count */}
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Active Projects</Label>
+                    <Select value={projectCount} onValueChange={setProjectCount}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select project count" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1-2">1-2 Projects</SelectItem>
+                        <SelectItem value="3-4">3-4 Projects</SelectItem>
+                        <SelectItem value="5+">5+ Projects</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={clearFilters} className="flex-1">
+                      <X className="h-4 w-4 mr-2" />
+                      Clear
+                    </Button>
+                    <Button onClick={() => setOpenFilterDialog(false)} className="flex-1">
+                      Apply Filters
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Dialog open={openAddDialog} onOpenChange={setOpenAddDialog}>
               <DialogTrigger asChild>
                 <Button size="sm">
