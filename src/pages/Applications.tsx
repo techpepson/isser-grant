@@ -7,6 +7,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { 
   Search, 
   Filter, 
@@ -18,7 +21,8 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  X
 } from "lucide-react";
 import QuickApplicationForm from "@/components/forms/QuickApplicationForm";
 
@@ -26,6 +30,12 @@ export default function Applications() {
   const canonical = typeof window !== 'undefined' ? window.location.href : '';
   const [searchTerm, setSearchTerm] = useState("");
   const [openNewAppDialog, setOpenNewAppDialog] = useState(false);
+  const [openFilterDialog, setOpenFilterDialog] = useState(false);
+  const [filters, setFilters] = useState({
+    statuses: [] as string[],
+    departments: [] as string[],
+    amount: ""
+  });
 
   const applications = [
     {
@@ -166,12 +176,60 @@ export default function Applications() {
     }
   };
 
-  const filteredApplications = applications.filter(app =>
-    app.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    app.applicant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    app.callTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    app.status.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Get unique values for filter options
+  const allStatuses = [...new Set(applications.map(app => app.status))];
+  const allDepartments = [...new Set(applications.map(app => app.applicant.department))];
+
+  const parseAmount = (amount: string) => {
+    return parseInt(amount.replace(/[$,]/g, ''));
+  };
+
+  const filteredApplications = applications.filter(app => {
+    // Search filter
+    const matchesSearch = app.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.applicant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.callTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.status.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Status filter
+    const matchesStatus = filters.statuses.length === 0 || filters.statuses.includes(app.status);
+
+    // Department filter
+    const matchesDepartment = filters.departments.length === 0 || 
+      filters.departments.includes(app.applicant.department);
+
+    // Amount filter
+    let matchesAmount = true;
+    if (filters.amount) {
+      const requestedAmount = parseAmount(app.requestedAmount);
+      switch (filters.amount) {
+        case "under-50k":
+          matchesAmount = requestedAmount < 50000;
+          break;
+        case "50k-100k":
+          matchesAmount = requestedAmount >= 50000 && requestedAmount <= 100000;
+          break;
+        case "100k-200k":
+          matchesAmount = requestedAmount >= 100000 && requestedAmount <= 200000;
+          break;
+        case "over-200k":
+          matchesAmount = requestedAmount > 200000;
+          break;
+      }
+    }
+
+    return matchesSearch && matchesStatus && matchesDepartment && matchesAmount;
+  });
+
+  const clearFilters = () => {
+    setFilters({
+      statuses: [],
+      departments: [],
+      amount: ""
+    });
+  };
+
+  const hasActiveFilters = filters.statuses.length > 0 || filters.departments.length > 0 || filters.amount;
 
   const pendingApps = filteredApplications.filter(app => 
     app.status === "Submitted" || app.status === "Under Review"
@@ -209,10 +267,102 @@ export default function Applications() {
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
+            <Dialog open={openFilterDialog} onOpenChange={setOpenFilterDialog}>
+              <DialogTrigger asChild>
+                <Button variant={hasActiveFilters ? "default" : "outline"} size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                  {hasActiveFilters && (
+                    <Badge variant="secondary" className="ml-2 text-xs">
+                      {Object.values(filters).filter(Boolean).length}
+                    </Badge>
+                  )}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Filter Applications</DialogTitle>
+                  <DialogDescription>Filter applications by status, department, and amount.</DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-6">
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Status</Label>
+                    <div className="space-y-2">
+                      {allStatuses.map(status => (
+                        <div key={status} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`status-${status}`}
+                            checked={filters.statuses.includes(status)}
+                            onCheckedChange={(checked) => 
+                              setFilters(prev => ({
+                                ...prev,
+                                statuses: checked 
+                                  ? [...prev.statuses, status]
+                                  : prev.statuses.filter(s => s !== status)
+                              }))
+                            }
+                          />
+                          <Label htmlFor={`status-${status}`} className="text-sm">
+                            {status}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Department</Label>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {allDepartments.map(department => (
+                        <div key={department} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`dept-${department}`}
+                            checked={filters.departments.includes(department)}
+                            onCheckedChange={(checked) => 
+                              setFilters(prev => ({
+                                ...prev,
+                                departments: checked 
+                                  ? [...prev.departments, department]
+                                  : prev.departments.filter(d => d !== department)
+                              }))
+                            }
+                          />
+                          <Label htmlFor={`dept-${department}`} className="text-sm">
+                            {department}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Requested Amount</Label>
+                    <Select value={filters.amount} onValueChange={(value) => setFilters(prev => ({...prev, amount: value}))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select amount range" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="under-50k">Under $50K</SelectItem>
+                        <SelectItem value="50k-100k">$50K - $100K</SelectItem>
+                        <SelectItem value="100k-200k">$100K - $200K</SelectItem>
+                        <SelectItem value="over-200k">Over $200K</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={clearFilters} className="flex-1">
+                      <X className="h-4 w-4 mr-2" />
+                      Clear
+                    </Button>
+                    <Button onClick={() => setOpenFilterDialog(false)} className="flex-1">
+                      Apply Filters
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Dialog open={openNewAppDialog} onOpenChange={setOpenNewAppDialog}>
               <DialogTrigger asChild>
                 <Button size="sm">

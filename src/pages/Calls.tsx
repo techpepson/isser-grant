@@ -5,11 +5,22 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Filter, Calendar, DollarSign, Users, ExternalLink, Clock, Building } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Search, Filter, Calendar, DollarSign, Users, ExternalLink, Clock, Building, X } from "lucide-react";
 
 export default function Calls() {
   const canonical = typeof window !== 'undefined' ? window.location.href : '';
   const [searchTerm, setSearchTerm] = useState("");
+  const [openFilterDialog, setOpenFilterDialog] = useState(false);
+  const [filters, setFilters] = useState({
+    status: "",
+    funders: [] as string[],
+    amount: "",
+    themes: [] as string[]
+  });
 
   const fundingCalls = [
     {
@@ -121,12 +132,63 @@ export default function Calls() {
     return diffDays;
   };
 
-  const filteredCalls = fundingCalls.filter(call =>
-    call.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    call.funder.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    call.theme.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    call.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  // Get unique values for filter options
+  const allFunders = [...new Set(fundingCalls.map(call => call.funder))];
+  const allThemes = [...new Set(fundingCalls.map(call => call.theme))];
+
+  const parseAmount = (amount: string) => {
+    return parseInt(amount.replace(/[$,]/g, ''));
+  };
+
+  const filteredCalls = fundingCalls.filter(call => {
+    // Search filter
+    const matchesSearch = call.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      call.funder.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      call.theme.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      call.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    // Status filter
+    const matchesStatus = !filters.status || call.status === filters.status;
+
+    // Funder filter
+    const matchesFunder = filters.funders.length === 0 || filters.funders.includes(call.funder);
+
+    // Amount filter
+    let matchesAmount = true;
+    if (filters.amount) {
+      const maxAward = parseAmount(call.maxAward);
+      switch (filters.amount) {
+        case "under-100k":
+          matchesAmount = maxAward < 100000;
+          break;
+        case "100k-300k":
+          matchesAmount = maxAward >= 100000 && maxAward <= 300000;
+          break;
+        case "300k-500k":
+          matchesAmount = maxAward >= 300000 && maxAward <= 500000;
+          break;
+        case "over-500k":
+          matchesAmount = maxAward > 500000;
+          break;
+      }
+    }
+
+    // Theme filter
+    const matchesTheme = filters.themes.length === 0 || filters.themes.includes(call.theme);
+
+    return matchesSearch && matchesStatus && matchesFunder && matchesAmount && matchesTheme;
+  });
+
+  const clearFilters = () => {
+    setFilters({
+      status: "",
+      funders: [],
+      amount: "",
+      themes: []
+    });
+  };
+
+  const hasActiveFilters = filters.status || filters.funders.length > 0 || filters.amount || filters.themes.length > 0;
 
   const activeCalls = filteredCalls.filter(call => call.status === "Active" || call.status === "Closing Soon");
   const upcomingCalls = filteredCalls.filter(call => call.status === "Opening Soon" || call.status === "Planning");
@@ -159,10 +221,117 @@ export default function Calls() {
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
+            <Dialog open={openFilterDialog} onOpenChange={setOpenFilterDialog}>
+              <DialogTrigger asChild>
+                <Button variant={hasActiveFilters ? "default" : "outline"} size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                  {hasActiveFilters && (
+                    <Badge variant="secondary" className="ml-2 text-xs">
+                      {Object.values(filters).filter(Boolean).length}
+                    </Badge>
+                  )}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Filter Funding Calls</DialogTitle>
+                  <DialogDescription>Filter calls by status, funder, amount, and theme.</DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-6">
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Status</Label>
+                    <Select value={filters.status} onValueChange={(value) => setFilters(prev => ({...prev, status: value}))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Active">Active</SelectItem>
+                        <SelectItem value="Closing Soon">Closing Soon</SelectItem>
+                        <SelectItem value="Opening Soon">Opening Soon</SelectItem>
+                        <SelectItem value="Planning">Planning</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Funder</Label>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {allFunders.map(funder => (
+                        <div key={funder} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`funder-${funder}`}
+                            checked={filters.funders.includes(funder)}
+                            onCheckedChange={(checked) => 
+                              setFilters(prev => ({
+                                ...prev,
+                                funders: checked 
+                                  ? [...prev.funders, funder]
+                                  : prev.funders.filter(f => f !== funder)
+                              }))
+                            }
+                          />
+                          <Label htmlFor={`funder-${funder}`} className="text-sm">
+                            {funder}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Award Amount</Label>
+                    <Select value={filters.amount} onValueChange={(value) => setFilters(prev => ({...prev, amount: value}))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select amount range" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="under-100k">Under $100K</SelectItem>
+                        <SelectItem value="100k-300k">$100K - $300K</SelectItem>
+                        <SelectItem value="300k-500k">$300K - $500K</SelectItem>
+                        <SelectItem value="over-500k">Over $500K</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Theme</Label>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {allThemes.map(theme => (
+                        <div key={theme} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`theme-${theme}`}
+                            checked={filters.themes.includes(theme)}
+                            onCheckedChange={(checked) => 
+                              setFilters(prev => ({
+                                ...prev,
+                                themes: checked 
+                                  ? [...prev.themes, theme]
+                                  : prev.themes.filter(t => t !== theme)
+                              }))
+                            }
+                          />
+                          <Label htmlFor={`theme-${theme}`} className="text-sm">
+                            {theme}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={clearFilters} className="flex-1">
+                      <X className="h-4 w-4 mr-2" />
+                      Clear
+                    </Button>
+                    <Button onClick={() => setOpenFilterDialog(false)} className="flex-1">
+                      Apply Filters
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 

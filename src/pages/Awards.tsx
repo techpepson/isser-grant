@@ -8,6 +8,9 @@ import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { 
   Search, 
   Filter, 
@@ -19,7 +22,8 @@ import {
   CheckCircle,
   Clock,
   Target,
-  ExternalLink
+  ExternalLink,
+  X
 } from "lucide-react";
 import NewAwardForm from "@/components/forms/NewAwardForm";
 
@@ -27,6 +31,13 @@ export default function Awards() {
   const canonical = typeof window !== 'undefined' ? window.location.href : '';
   const [searchTerm, setSearchTerm] = useState("");
   const [openNewAwardDialog, setOpenNewAwardDialog] = useState(false);
+  const [openFilterDialog, setOpenFilterDialog] = useState(false);
+  const [filters, setFilters] = useState({
+    statuses: [] as string[],
+    departments: [] as string[],
+    amount: "",
+    progress: ""
+  });
 
   const awards = [
     {
@@ -149,11 +160,80 @@ export default function Awards() {
     }
   };
 
-  const filteredAwards = awards.filter(award =>
-    award.projectTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    award.principalInvestigator.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    award.fundingCall.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Get unique values for filter options
+  const allStatuses = [...new Set(awards.map(award => award.status))];
+  const allDepartments = [...new Set(awards.map(award => award.principalInvestigator.department))];
+
+  const parseAmount = (amount: string) => {
+    return parseInt(amount.replace(/[$,]/g, ''));
+  };
+
+  const filteredAwards = awards.filter(award => {
+    // Search filter
+    const matchesSearch = award.projectTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      award.principalInvestigator.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      award.fundingCall.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Status filter
+    const matchesStatus = filters.statuses.length === 0 || filters.statuses.includes(award.status);
+
+    // Department filter
+    const matchesDepartment = filters.departments.length === 0 || 
+      filters.departments.includes(award.principalInvestigator.department);
+
+    // Amount filter
+    let matchesAmount = true;
+    if (filters.amount) {
+      const awardAmount = parseAmount(award.awardAmount);
+      switch (filters.amount) {
+        case "under-100k":
+          matchesAmount = awardAmount < 100000;
+          break;
+        case "100k-300k":
+          matchesAmount = awardAmount >= 100000 && awardAmount <= 300000;
+          break;
+        case "300k-500k":
+          matchesAmount = awardAmount >= 300000 && awardAmount <= 500000;
+          break;
+        case "over-500k":
+          matchesAmount = awardAmount > 500000;
+          break;
+      }
+    }
+
+    // Progress filter
+    let matchesProgress = true;
+    if (filters.progress) {
+      switch (filters.progress) {
+        case "0-25":
+          matchesProgress = award.progress >= 0 && award.progress <= 25;
+          break;
+        case "26-50":
+          matchesProgress = award.progress >= 26 && award.progress <= 50;
+          break;
+        case "51-75":
+          matchesProgress = award.progress >= 51 && award.progress <= 75;
+          break;
+        case "76-100":
+          matchesProgress = award.progress >= 76 && award.progress <= 100;
+          break;
+      }
+    }
+
+    return matchesSearch && matchesStatus && matchesDepartment && matchesAmount && matchesProgress;
+  });
+
+  const clearFilters = () => {
+    setFilters({
+      statuses: [],
+      departments: [],
+      amount: "",
+      progress: ""
+    });
+  };
+
+  const hasActiveFilters = filters.statuses.length > 0 || filters.departments.length > 0 || 
+    filters.amount || filters.progress;
 
   const activeAwards = filteredAwards.filter(award => award.status === "Active");
   const completedAwards = filteredAwards.filter(award => award.status === "Completed");
@@ -186,10 +266,117 @@ export default function Awards() {
             />
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
+            <Dialog open={openFilterDialog} onOpenChange={setOpenFilterDialog}>
+              <DialogTrigger asChild>
+                <Button variant={hasActiveFilters ? "default" : "outline"} size="sm">
+                  <Filter className="h-4 w-4 mr-2" />
+                  Filter
+                  {hasActiveFilters && (
+                    <Badge variant="secondary" className="ml-2 text-xs">
+                      {Object.values(filters).filter(Boolean).length}
+                    </Badge>
+                  )}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Filter Awards</DialogTitle>
+                  <DialogDescription>Filter awards by status, department, and funding.</DialogDescription>
+                </DialogHeader>
+                
+                <div className="space-y-6">
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Status</Label>
+                    <div className="space-y-2">
+                      {allStatuses.map(status => (
+                        <div key={status} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`status-${status}`}
+                            checked={filters.statuses.includes(status)}
+                            onCheckedChange={(checked) => 
+                              setFilters(prev => ({
+                                ...prev,
+                                statuses: checked 
+                                  ? [...prev.statuses, status]
+                                  : prev.statuses.filter(s => s !== status)
+                              }))
+                            }
+                          />
+                          <Label htmlFor={`status-${status}`} className="text-sm">
+                            {status}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Department</Label>
+                    <div className="space-y-2 max-h-32 overflow-y-auto">
+                      {allDepartments.map(department => (
+                        <div key={department} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`dept-${department}`}
+                            checked={filters.departments.includes(department)}
+                            onCheckedChange={(checked) => 
+                              setFilters(prev => ({
+                                ...prev,
+                                departments: checked 
+                                  ? [...prev.departments, department]
+                                  : prev.departments.filter(d => d !== department)
+                              }))
+                            }
+                          />
+                          <Label htmlFor={`dept-${department}`} className="text-sm">
+                            {department}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Award Amount</Label>
+                    <Select value={filters.amount} onValueChange={(value) => setFilters(prev => ({...prev, amount: value}))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select amount range" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="under-100k">Under $100K</SelectItem>
+                        <SelectItem value="100k-300k">$100K - $300K</SelectItem>
+                        <SelectItem value="300k-500k">$300K - $500K</SelectItem>
+                        <SelectItem value="over-500k">Over $500K</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium mb-3 block">Progress</Label>
+                    <Select value={filters.progress} onValueChange={(value) => setFilters(prev => ({...prev, progress: value}))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select progress range" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0-25">0-25%</SelectItem>
+                        <SelectItem value="26-50">26-50%</SelectItem>
+                        <SelectItem value="51-75">51-75%</SelectItem>
+                        <SelectItem value="76-100">76-100%</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button variant="outline" onClick={clearFilters} className="flex-1">
+                      <X className="h-4 w-4 mr-2" />
+                      Clear
+                    </Button>
+                    <Button onClick={() => setOpenFilterDialog(false)} className="flex-1">
+                      Apply Filters
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Dialog open={openNewAwardDialog} onOpenChange={setOpenNewAwardDialog}>
               <DialogTrigger asChild>
                 <Button size="sm">
