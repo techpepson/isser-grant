@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { format, isSameDay } from "date-fns";
 import { Calendar as CalendarIcon, Clock, MapPin, Users } from "lucide-react";
+import { AddEventDialog } from "./AddEventDialog";
 
 interface CalendarEvent {
   id: string;
@@ -17,7 +18,7 @@ interface CalendarEvent {
   attendees?: number;
 }
 
-const events: CalendarEvent[] = [
+const initialEvents: CalendarEvent[] = [
   {
     id: "1",
     title: "NSF Research Grant Application",
@@ -63,6 +64,15 @@ const events: CalendarEvent[] = [
 
 export function CalendarView() {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
+  
+  const addEvent = (newEventData: Omit<CalendarEvent, 'id'>) => {
+    const newEvent: CalendarEvent = {
+      ...newEventData,
+      id: Date.now().toString(),
+    };
+    setEvents(prev => [...prev, newEvent]);
+  };
   
   const getEventsForDate = (date: Date) => {
     return events.filter(event => isSameDay(event.date, date));
@@ -192,9 +202,14 @@ export function CalendarView() {
             <div className="text-center py-8 text-muted-foreground">
               <CalendarIcon className="h-12 w-12 mx-auto mb-4 opacity-20" />
               <p>No events scheduled for this date</p>
-              <Button variant="outline" size="sm" className="mt-4">
-                Add Event
-              </Button>
+              <div className="mt-4">
+                <AddEventDialog selectedDate={selectedDate} onEventAdd={addEvent} />
+              </div>
+            </div>
+          )}
+          {selectedEvents.length > 0 && (
+            <div className="mt-6 pt-4 border-t">
+              <AddEventDialog selectedDate={selectedDate} onEventAdd={addEvent} />
             </div>
           )}
         </CardContent>
