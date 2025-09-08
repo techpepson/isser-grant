@@ -10,6 +10,7 @@ import Researchers from "./pages/Researchers";
 import Calls from "./pages/Calls";
 import Applications from "./pages/Applications";
 import Awards from "./pages/Awards";
+import Calendar from "./pages/Calendar";
 import Finance from "./pages/Finance";
 import Milestones from "./pages/Milestones";
 import Reports from "./pages/Reports";
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/calls" element={<Calls />} />
               <Route path="/applications" element={<Applications />} />
               <Route path="/awards" element={<Awards />} />
+              <Route path="/calendar" element={<Calendar />} />
               <Route path="/finance" element={<Finance />} />
               <Route path="/milestones" element={<Milestones />} />
               <Route path="/reports" element={<Reports />} />

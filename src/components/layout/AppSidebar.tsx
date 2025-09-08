@@ -21,6 +21,7 @@ import {
   BarChart3,
   Shield,
   Settings as SettingsIcon,
+  Calendar,
 } from "lucide-react";
 
 const items = [
@@ -29,6 +30,7 @@ const items = [
   { title: "Calls", url: "/calls", icon: Megaphone },
   { title: "Applications", url: "/applications", icon: FileText },
   { title: "Awards", url: "/awards", icon: Trophy },
+  { title: "Calendar", url: "/calendar", icon: Calendar },
   { title: "Finance", url: "/finance", icon: Wallet },
   { title: "Milestones", url: "/milestones", icon: Flag },
   { title: "Reports", url: "/reports", icon: BarChart3 },
