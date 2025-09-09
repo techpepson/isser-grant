@@ -10,6 +10,7 @@ export default function AppLayout({ children }: PropsWithChildren) {
         <div className="flex-1 flex flex-col">
           <header className="h-16 flex items-center justify-between border-b bg-primary/5 backdrop-blur supports-[backdrop-filter]:bg-primary/5 px-6">
             <div className="flex items-center gap-4">
+              <SidebarTrigger />
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">UG</span>
