@@ -4,6 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Progress } from "@/components/ui/progress";
+import { ProjectDetailsModal } from "@/components/finance/ProjectDetailsModal";
+import { TransactionHistoryModal } from "@/components/finance/TransactionHistoryModal";
 import { 
   DollarSign, 
   TrendingUp, 
@@ -20,6 +23,21 @@ import {
 
 export default function Finance() {
   const canonical = typeof window !== 'undefined' ? window.location.href : '';
+  
+  // Modal state management
+  const [selectedProject, setSelectedProject] = useState<typeof projectBudgets[0] | null>(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isTransactionModalOpen, setIsTransactionModalOpen] = useState(false);
+
+  const handleViewDetails = (project: typeof projectBudgets[0]) => {
+    setSelectedProject(project);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleViewTransactionHistory = (project: typeof projectBudgets[0]) => {
+    setSelectedProject(project);
+    setIsTransactionModalOpen(true);
+  };
 
   const budgetOverview = {
     totalAllocated: "$2,400,000",
@@ -267,10 +285,18 @@ export default function Finance() {
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleViewDetails(project)}
+                    >
                       View Details
                     </Button>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => handleViewTransactionHistory(project)}
+                    >
                       Transaction History
                     </Button>
                   </div>
@@ -449,6 +475,19 @@ export default function Finance() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Modals */}
+        <ProjectDetailsModal
+          project={selectedProject}
+          isOpen={isDetailsModalOpen}
+          onClose={() => setIsDetailsModalOpen(false)}
+        />
+        
+        <TransactionHistoryModal
+          project={selectedProject}
+          isOpen={isTransactionModalOpen}
+          onClose={() => setIsTransactionModalOpen(false)}
+        />
       </div>
     </>
   );
