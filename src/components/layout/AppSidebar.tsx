@@ -45,7 +45,7 @@ export function AppSidebar() {
   const isActive = (path: string) => currentPath === path;
 
   return (
-    <Sidebar collapsible="offcanvas" className="w-64 border-r">
+    <Sidebar collapsible="none" className="w-64 border-r">
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
