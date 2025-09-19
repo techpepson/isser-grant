@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Welcome to your Lovable project
 
 ## Project info
@@ -71,3 +72,7 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+=======
+# isser-grant
+An app for the ISSER group to perform their research easily.
+>>>>>>> aef4809a944161336870a577754c64225e9bb397
