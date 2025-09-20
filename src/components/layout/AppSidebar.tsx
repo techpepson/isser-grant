@@ -57,11 +57,6 @@ export function AppSidebar() {
                     <NavLink 
                       to={item.url} 
                       end 
-                      className={({ isActive }) => 
-                        isActive 
-                          ? "bg-primary/10 text-primary border-r-2 border-primary" 
-                          : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                      }
                     >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
