@@ -8,6 +8,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Calendar as CalendarIcon, FilePlus2, Award as AwardIcon, FileText, DollarSign, BarChart3, CalendarDays, Flag } from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
 
 export default function ResearcherPortal() {
   const canonical = typeof window !== 'undefined' ? window.location.href : '';
@@ -29,29 +39,110 @@ export default function ResearcherPortal() {
 
         <div className="grid lg:grid-cols-4 gap-6">
           {/* Sidebar */}
-          <aside className="lg:col-span-1 space-y-2">
-            <Button variant={activeTab === "new-application" ? "default" : "outline"} className="w-full justify-start" onClick={() => setActiveTab("new-application")}>
-              <FilePlus2 className="h-4 w-4 mr-2" /> New Application
-            </Button>
-            <Button variant={activeTab === "add-award" ? "default" : "outline"} className="w-full justify-start" onClick={() => setActiveTab("add-award")}>
-              <AwardIcon className="h-4 w-4 mr-2" /> Add Award
-            </Button>
-            <Button variant={activeTab === "apply-call" ? "default" : "outline"} className="w-full justify-start" onClick={() => setActiveTab("apply-call")}>
-              <FileText className="h-4 w-4 mr-2" /> Apply for a Call
-            </Button>
-            <Button variant={activeTab === "reports" ? "default" : "outline"} className="w-full justify-start" onClick={() => setActiveTab("reports")}>
-              <BarChart3 className="h-4 w-4 mr-2" /> Financial Reports
-            </Button>
-            <Button variant={activeTab === "finance" ? "default" : "outline"} className="w-full justify-start" onClick={() => setActiveTab("finance")}>
-              <DollarSign className="h-4 w-4 mr-2" /> Finance
-            </Button>
-            <Button variant={activeTab === "calendar" ? "default" : "outline"} className="w-full justify-start" onClick={() => setActiveTab("calendar")}>
-              <CalendarIcon className="h-4 w-4 mr-2" /> Calendar
-            </Button>
-            <Button variant={activeTab === "add-milestone" ? "default" : "outline"} className="w-full justify-start" onClick={() => setActiveTab("add-milestone")}>
-              <Flag className="h-4 w-4 mr-2" /> Add Milestone
-            </Button>
-          </aside>
+          {/* Sidebar (match admin sidebar primitives) */}
+<aside className="lg:col-span-1">
+  <Sidebar collapsible="none" className="w-full border rounded">
+    <SidebarContent>
+      <SidebarGroup>
+        <SidebarGroupLabel>Researcher</SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild data-active={activeTab === "new-application"}>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("new-application")}
+                  className="w-full text-left flex items-center gap-2"
+                >
+                  <FilePlus2 className="h-4 w-4" />
+                  <span>New Application</span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild data-active={activeTab === "add-award"}>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("add-award")}
+                  className="w-full text-left flex items-center gap-2"
+                >
+                  <AwardIcon className="h-4 w-4" />
+                  <span>Add Award</span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild data-active={activeTab === "apply-call"}>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("apply-call")}
+                  className="w-full text-left flex items-center gap-2"
+                >
+                  <FileText className="h-4 w-4" />
+                  <span>Apply for a Call</span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild data-active={activeTab === "reports"}>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("reports")}
+                  className="w-full text-left flex items-center gap-2"
+                >
+                  <BarChart3 className="h-4 w-4" />
+                  <span>Financial Reports</span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild data-active={activeTab === "finance"}>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("finance")}
+                  className="w-full text-left flex items-center gap-2"
+                >
+                  <DollarSign className="h-4 w-4" />
+                  <span>Finance</span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild data-active={activeTab === "calendar"}>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("calendar")}
+                  className="w-full text-left flex items-center gap-2"
+                >
+                  <CalendarIcon className="h-4 w-4" />
+                  <span>Calendar</span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild data-active={activeTab === "add-milestone"}>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("add-milestone")}
+                  className="w-full text-left flex items-center gap-2"
+                >
+                  <Flag className="h-4 w-4" />
+                  <span>Add Milestone</span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    </SidebarContent>
+  </Sidebar>
+</aside>
 
           {/* Content */}
           <section className="lg:col-span-3">
