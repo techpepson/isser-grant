@@ -16,6 +16,8 @@ import Milestones from "./pages/Milestones";
 import Reports from "./pages/Reports";
 import Admin from "./pages/Admin";
 import Settings from "./pages/Settings";
+import ResearcherPortal from "./pages/ResearcherPortal";
+import AssistantPortal from "./pages/AssistantPortal";
 import { HelmetProvider } from "react-helmet-async";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,8 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/researchers" element={<Researchers />} />
+              <Route path="/researcher" element={<ResearcherPortal />} />
+              <Route path="/assistant" element={<AssistantPortal />} />
               <Route path="/calls" element={<Calls />} />
               <Route path="/applications" element={<Applications />} />
               <Route path="/awards" element={<Awards />} />

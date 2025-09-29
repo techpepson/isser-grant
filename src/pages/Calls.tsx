@@ -9,12 +9,24 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Search, Filter, Calendar, DollarSign, Users, ExternalLink, Clock, Building, X } from "lucide-react";
 
 export default function Calls() {
   const canonical = typeof window !== 'undefined' ? window.location.href : '';
   const [searchTerm, setSearchTerm] = useState("");
   const [openFilterDialog, setOpenFilterDialog] = useState(false);
+  const [openAddDialog, setOpenAddDialog] = useState(false);
+  const [newCall, setNewCall] = useState({
+    title: "",
+    funder: "",
+    totalFunding: "",
+    maxAward: "",
+    theme: "",
+    eligibilityText: "",
+    deadline: "",
+    status: "Active" as "Active" | "Closing Soon" | "Opening Soon" | "Planning",
+  });
   const [filters, setFilters] = useState({
     status: "",
     funders: [] as string[],
@@ -22,7 +34,7 @@ export default function Calls() {
     themes: [] as string[]
   });
 
-  const fundingCalls = [
+  const [fundingCalls, setFundingCalls] = useState([
     {
       id: "NSF-2024-001",
       title: "National Science Foundation Research Grant Program",
@@ -107,7 +119,43 @@ export default function Calls() {
       eligibility: ["Education researchers", "K-12 partnerships", "Higher education faculty"],
       keywords: ["Education Research", "Learning Outcomes", "Educational Technology"]
     }
-  ];
+  ]);
+
+  const handleAddCallSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const eligibility = newCall.eligibilityText
+      .split("\n")
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    const created = {
+      id: `CALL-${Date.now()}`,
+      title: newCall.title,
+      funder: newCall.funder,
+      theme: newCall.theme,
+      totalFunding: newCall.totalFunding,
+      maxAward: newCall.maxAward,
+      deadline: newCall.deadline,
+      status: newCall.status,
+      applications: 0,
+      description: "",
+      eligibility,
+      keywords: [] as string[],
+    };
+
+    setFundingCalls(prev => [created, ...prev]);
+    setOpenAddDialog(false);
+    setNewCall({
+      title: "",
+      funder: "",
+      totalFunding: "",
+      maxAward: "",
+      theme: "",
+      eligibilityText: "",
+      deadline: "",
+      status: "Active",
+    });
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -221,7 +269,10 @@ export default function Calls() {
             />
           </div>
           <div className="flex gap-2">
-            <Dialog open={openFilterDialog} onOpenChange={setOpenFilterDialog}>
+            <Button size="sm" onClick={() => setOpenAddDialog(true)}>
+               Add A Call
+             </Button>
+             <Dialog open={openFilterDialog} onOpenChange={setOpenFilterDialog}>
               <DialogTrigger asChild>
                 <Button variant={hasActiveFilters ? "default" : "outline"} size="sm">
                   <Filter className="h-4 w-4 mr-2" />
@@ -542,6 +593,103 @@ export default function Calls() {
           </TabsContent>
         </Tabs>
       </div>
+
+      <Dialog open={openAddDialog} onOpenChange={setOpenAddDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Funding Call</DialogTitle>
+            <DialogDescription>Fill out the details for the new funding call.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleAddCallSubmit}>
+            <div className="space-y-6">
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Call Title</Label>
+                <Input
+                  value={newCall.title}
+                  onChange={(e) => setNewCall(prev => ({...prev, title: e.target.value}))}
+                  placeholder="e.g., Research Grant Program"
+                  required
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Call Funder</Label>
+                <Input
+                  value={newCall.funder}
+                  onChange={(e) => setNewCall(prev => ({...prev, funder: e.target.value}))}
+                  placeholder="e.g., National Science Foundation"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Total Available</Label>
+                  <Input
+                    value={newCall.totalFunding}
+                    onChange={(e) => setNewCall(prev => ({...prev, totalFunding: e.target.value}))}
+                    placeholder="$1,000,000"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Maximum Award</Label>
+                  <Input
+                    value={newCall.maxAward}
+                    onChange={(e) => setNewCall(prev => ({...prev, maxAward: e.target.value}))}
+                    placeholder="$100,000"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Theme</Label>
+                <Input
+                  value={newCall.theme}
+                  onChange={(e) => setNewCall(prev => ({...prev, theme: e.target.value}))}
+                  placeholder="e.g., Energy & Environment"
+                  required
+                />
+              </div>
+              <div>
+                <Label className="text-sm font-medium mb-2 block">Eligibility (one per line)</Label>
+                <Textarea
+                  value={newCall.eligibilityText}
+                  onChange={(e) => setNewCall(prev => ({...prev, eligibilityText: e.target.value}))}
+                  placeholder={"e.g.\nFaculty at accredited institutions\nPhD holders"}
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Due Date</Label>
+                  <Input
+                    type="date"
+                    value={newCall.deadline}
+                    onChange={(e) => setNewCall(prev => ({...prev, deadline: e.target.value}))}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label className="text-sm font-medium mb-2 block">Call Status</Label>
+                  <Select value={newCall.status} onValueChange={(value) => setNewCall(prev => ({...prev, status: value as any}))}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Closing Soon">Closing Soon</SelectItem>
+                      <SelectItem value="Opening Soon">Opening Soon</SelectItem>
+                      <SelectItem value="Planning">Planning</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button type="submit" className="flex-1">Add Call</Button>
+                <Button type="button" variant="outline" className="flex-1" onClick={() => setOpenAddDialog(false)}>Cancel</Button>
+              </div>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

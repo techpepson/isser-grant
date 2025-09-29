@@ -11,16 +11,17 @@ import { useToast } from "@/hooks/use-toast";
 
 const awardSchema = z.object({
   applicationId: z.string().min(1, "Application ID is required"),
-  projectTitle: z.string().min(1, "Project title is required"),
+  awardTitle: z.string().min(1, "Award title is required"),
   principalInvestigatorStaffId: z.string().min(1, "Principal Investigator Staff ID is required"),
-  department: z.string().min(1, "Department is required"),
+  // department: z.string().min(1, "Department is required"),
   awardAmount: z.string().min(1, "Award amount is required"),
   duration: z.string().min(1, "Duration is required"),
   startDate: z.string().min(1, "Start date is required"),
   endDate: z.string().min(1, "End date is required"),
   fundingCall: z.string().min(1, "Funding call is required"),
-  description: z.string().min(1, "Project description is required"),
+  description: z.string().min(1, "Award description is required"),
   awardType: z.string().min(1, "Award type is required"),
+  awardImage: z.string().min(1, "Award image is required"),
 });
 
 type AwardForm = z.infer<typeof awardSchema>;
@@ -38,16 +39,17 @@ export default function NewAwardForm({ onSubmit, onCancel }: NewAwardFormProps) 
     resolver: zodResolver(awardSchema),
     defaultValues: {
       applicationId: "",
-      projectTitle: "",
+      awardTitle: "",
       principalInvestigatorStaffId: "",
-      department: "",
+      // department: "",
       awardAmount: "",
       duration: "",
-      startDate: "",
-      endDate: "",
+      // startDate: "",
+      // endDate: "",
       fundingCall: "",
       description: "",
       awardType: "",
+      awardImage: "",
     },
   });
 
@@ -59,7 +61,7 @@ export default function NewAwardForm({ onSubmit, onCancel }: NewAwardFormProps) 
       
       toast({
         title: "Award Created",
-        description: `Award for ${data.projectTitle} has been created successfully.`,
+        description: `Award for ${data.awardTitle} has been created successfully.`,
       });
       
       onSubmit?.(data);
@@ -104,19 +106,19 @@ export default function NewAwardForm({ onSubmit, onCancel }: NewAwardFormProps) 
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="projectTitle">Project Title</Label>
+        <Label htmlFor="awardTitle">Award Title</Label>
         <Input
-          id="projectTitle"
-          placeholder="Enter project title"
-          {...form.register("projectTitle")}
+          id="awardTitle"
+          placeholder="Enter award title"
+          {...form.register("awardTitle")}
         />
-        {form.formState.errors.projectTitle && (
-          <p className="text-sm text-destructive">{form.formState.errors.projectTitle.message}</p>
+        {form.formState.errors.awardTitle && (
+          <p className="text-sm text-destructive">{form.formState.errors.awardTitle.message}</p>
         )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Label htmlFor="department">Department</Label>
           <Input
             id="department"
@@ -126,7 +128,7 @@ export default function NewAwardForm({ onSubmit, onCancel }: NewAwardFormProps) 
           {form.formState.errors.department && (
             <p className="text-sm text-destructive">{form.formState.errors.department.message}</p>
           )}
-        </div>
+        </div> */}
         
         <div className="space-y-2">
           <Label htmlFor="awardAmount">Award Amount (GHS)</Label>
@@ -166,6 +168,7 @@ export default function NewAwardForm({ onSubmit, onCancel }: NewAwardFormProps) 
               <SelectItem value="equipment-grant">Equipment Grant</SelectItem>
               <SelectItem value="travel-grant">Travel Grant</SelectItem>
               <SelectItem value="collaborative">Collaborative Award</SelectItem>
+              <SelectItem value="best-paper">Best Paper Award</SelectItem>
             </SelectContent>
           </Select>
           {form.formState.errors.awardType && (
@@ -176,7 +179,7 @@ export default function NewAwardForm({ onSubmit, onCancel }: NewAwardFormProps) 
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="startDate">Start Date</Label>
+          <Label htmlFor="dueDate">Start Date</Label>
           <Input
             id="startDate"
             type="date"
@@ -187,7 +190,7 @@ export default function NewAwardForm({ onSubmit, onCancel }: NewAwardFormProps) 
           )}
         </div>
         
-        <div className="space-y-2">
+        {/* <div className="space-y-2">
           <Label htmlFor="endDate">End Date</Label>
           <Input
             id="endDate"
@@ -197,7 +200,7 @@ export default function NewAwardForm({ onSubmit, onCancel }: NewAwardFormProps) 
           {form.formState.errors.endDate && (
             <p className="text-sm text-destructive">{form.formState.errors.endDate.message}</p>
           )}
-        </div>
+        </div> */}
       </div>
 
       <div className="space-y-2">
@@ -212,11 +215,24 @@ export default function NewAwardForm({ onSubmit, onCancel }: NewAwardFormProps) 
         )}
       </div>
 
+      <div>
+        <Label htmlFor="awardImage">Upload an image of the award</Label>
+        <Input
+          id="awardImage"
+          type="file"
+          accept="image/*"
+          {...form.register("awardImage")}
+        />
+        {form.formState.errors.awardImage && (
+          <p className="text-sm text-destructive">{form.formState.errors.awardImage.message}</p>
+        )}
+      </div>
+
       <div className="space-y-2">
-        <Label htmlFor="description">Project Description</Label>
+        <Label htmlFor="description">Award Description</Label>
         <Textarea
           id="description"
-          placeholder="Enter detailed project description"
+          placeholder="Enter detailed award description"
           rows={4}
           {...form.register("description")}
         />

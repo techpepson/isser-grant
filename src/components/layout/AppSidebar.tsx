@@ -26,7 +26,6 @@ import {
 
 const items = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Researchers", url: "/researchers", icon: Users },
   { title: "Calls", url: "/calls", icon: Megaphone },
   { title: "Applications", url: "/applications", icon: FileText },
   { title: "Awards", url: "/awards", icon: Trophy },

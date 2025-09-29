@@ -1,16 +1,19 @@
 import { PropsWithChildren } from "react";
+import { useLocation } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 
 export default function AppLayout({ children }: PropsWithChildren) {
+  const location = useLocation();
+  const isResearcherPortal = location.pathname.startsWith("/researcher");
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="min-h-screen flex w-full">
-        <AppSidebar />
+        {!isResearcherPortal && <AppSidebar />}
         <div className="flex-1 flex flex-col">
           <header className="h-16 flex items-center justify-between border-b bg-primary/5 backdrop-blur supports-[backdrop-filter]:bg-primary/5 px-6">
             <div className="flex items-center gap-4">
-              <SidebarTrigger />
+              {!isResearcherPortal && <SidebarTrigger />}
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gradient-to-r from-primary to-accent rounded-lg flex items-center justify-center">
                   <span className="text-white font-bold text-sm">UG</span>
@@ -23,8 +26,8 @@ export default function AppLayout({ children }: PropsWithChildren) {
             </div>
             <div className="flex items-center gap-4">
               <div className="text-right">
-                <p className="text-sm font-medium text-foreground">Research Office</p>
-                <p className="text-xs text-muted-foreground">Admin Portal</p>
+                <p className="text-sm font-medium text-foreground">{isResearcherPortal ? "Researcher" : "Research Office"}</p>
+                <p className="text-xs text-muted-foreground">{isResearcherPortal ? "Researcher Portal" : "Admin Portal"}</p>
               </div>
             </div>
           </header>
