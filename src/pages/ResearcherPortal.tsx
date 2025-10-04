@@ -263,24 +263,11 @@ export default function ResearcherPortal() {
       </Helmet>
 
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Researcher Portal
-          </h1>
-          <p className="text-muted-foreground">
-            Your workspace for managing applications, awards, finances, and
-            milestones.
-          </p>
-        </div>
-
         <div className="grid lg:grid-cols-4 gap-6 min-h-screen">
           {/* Sidebar */}
           {/* Sidebar (match admin sidebar primitives) */}
-          <aside className="lg:col-span-1">
-            <Sidebar
-              collapsible="none"
-              className="w-full border rounded h-full"
-            >
+          <aside className="lg:col-span-1 w-full">
+            <Sidebar collapsible="none" className="w-60 border rounded h-full">
               <SidebarContent className="h-full">
                 <SidebarGroup className="h-full">
                   <SidebarGroupLabel>Researcher</SidebarGroupLabel>
@@ -422,7 +409,7 @@ export default function ResearcherPortal() {
           </aside>
 
           {/* Content */}
-          <section className="lg:col-span-3">
+          <section className="lg:col-span-3 w-full">
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
