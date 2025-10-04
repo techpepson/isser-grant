@@ -16,6 +16,10 @@ import {
   BarChart3,
   CalendarDays,
   Flag,
+  Users,
+  Activity,
+  Clock,
+  CheckCircle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -32,52 +36,55 @@ export default function ResearcherPortal() {
   const canonical = typeof window !== "undefined" ? window.location.href : "";
   const [activeTab, setActiveTab] = useState("dashboard");
   // Calls data for Apply page and Calendar
-  const calls = [
-    {
-      id: "NSF-2024-001",
-      title: "NSF Research Grant Program",
-      funder: "National Science Foundation",
-      theme: "Basic Research",
-      totalFunding: "$5,000,000",
-      maxAward: "$250,000",
-      deadline: "2025-11-15",
-      status: "Active",
-      applications: 45,
-    },
-    {
-      id: "NIH-2024-002",
-      title: "Biomedical Research Excellence",
-      funder: "NIH",
-      theme: "Health & Medicine",
-      totalFunding: "$8,000,000",
-      maxAward: "$400,000",
-      deadline: "2025-10-20",
-      status: "Active",
-      applications: 32,
-    },
-    {
-      id: "DOE-2024-003",
-      title: "Clean Energy Innovation",
-      funder: "DOE",
-      theme: "Energy & Environment",
-      totalFunding: "$10,000,000",
-      maxAward: "$500,000",
-      deadline: "2025-12-10",
-      status: "Active",
-      applications: 28,
-    },
-    {
-      id: "EPA-2024-004",
-      title: "Environmental Sustainability",
-      funder: "EPA",
-      theme: "Environment",
-      totalFunding: "$3,000,000",
-      maxAward: "$150,000",
-      deadline: "2025-10-05",
-      status: "Closing Soon",
-      applications: 67,
-    },
-  ];
+  const calls = useMemo(
+    () => [
+      {
+        id: "NSF-2024-001",
+        title: "NSF Research Grant Program",
+        funder: "National Science Foundation",
+        theme: "Basic Research",
+        totalFunding: "$5,000,000",
+        maxAward: "$250,000",
+        deadline: "2025-11-15",
+        status: "Active",
+        applications: 45,
+      },
+      {
+        id: "NIH-2024-002",
+        title: "Biomedical Research Excellence",
+        funder: "NIH",
+        theme: "Health & Medicine",
+        totalFunding: "$8,000,000",
+        maxAward: "$400,000",
+        deadline: "2025-10-20",
+        status: "Active",
+        applications: 32,
+      },
+      {
+        id: "DOE-2024-003",
+        title: "Clean Energy Innovation",
+        funder: "DOE",
+        theme: "Energy & Environment",
+        totalFunding: "$10,000,000",
+        maxAward: "$500,000",
+        deadline: "2025-12-10",
+        status: "Active",
+        applications: 28,
+      },
+      {
+        id: "EPA-2024-004",
+        title: "Environmental Sustainability",
+        funder: "EPA",
+        theme: "Environment",
+        totalFunding: "$3,000,000",
+        maxAward: "$150,000",
+        deadline: "2025-10-05",
+        status: "Closing Soon",
+        applications: 67,
+      },
+    ],
+    []
+  );
 
   const [callSearch, setCallSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
@@ -114,6 +121,112 @@ export default function ResearcherPortal() {
     },
   ]);
   const [editingId, setEditingId] = useState<string | null>(null);
+
+  // Expenses management
+  type Expense = {
+    id: string;
+    date: string;
+    purpose: string;
+    amount: number;
+    category: string;
+    project?: string;
+    description?: string;
+    status: "pending" | "approved" | "rejected";
+  };
+
+  const [expenses, setExpenses] = useState<Expense[]>([
+    {
+      id: "E-001",
+      date: "2025-10-15",
+      purpose: "Lab Equipment",
+      amount: 2500,
+      category: "Equipment",
+      project: "DOE-2024-003",
+      description: "Purchase of specialized research equipment",
+      status: "approved",
+    },
+    {
+      id: "E-002",
+      date: "2025-10-12",
+      purpose: "Conference Travel",
+      amount: 1200,
+      category: "Travel",
+      project: "NSF-2024-001",
+      description: "Attending AI research conference",
+      status: "pending",
+    },
+    {
+      id: "E-003",
+      date: "2025-10-08",
+      purpose: "Software License",
+      amount: 450,
+      category: "Software",
+      project: "NIH-2024-002",
+      description: "Annual license for data analysis software",
+      status: "approved",
+    },
+  ]);
+
+  const [newExpense, setNewExpense] = useState({
+    date: "",
+    purpose: "",
+    amount: "",
+    category: "",
+    project: "",
+    description: "",
+  });
+
+  const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
+
+  // Expense management functions
+  const addExpense = () => {
+    if (
+      !newExpense.date ||
+      !newExpense.purpose ||
+      !newExpense.amount ||
+      !newExpense.category
+    ) {
+      alert("Please fill in all required fields");
+      return;
+    }
+
+    const expense: Expense = {
+      id: `E-${Date.now()}`,
+      date: newExpense.date,
+      purpose: newExpense.purpose,
+      amount: parseFloat(newExpense.amount),
+      category: newExpense.category,
+      project: newExpense.project || undefined,
+      description: newExpense.description || undefined,
+      status: "pending",
+    };
+
+    setExpenses([expense, ...expenses]);
+    setNewExpense({
+      date: "",
+      purpose: "",
+      amount: "",
+      category: "",
+      project: "",
+      description: "",
+    });
+  };
+
+  const deleteExpense = (id: string) => {
+    setExpenses(expenses.filter((e) => e.id !== id));
+  };
+
+  // Financial calculations
+  const totalExpenses = expenses.reduce(
+    (sum, expense) => sum + expense.amount,
+    0
+  );
+  const approvedExpenses = expenses
+    .filter((expense) => expense.status === "approved")
+    .reduce((sum, expense) => sum + expense.amount, 0);
+  const pendingExpenses = expenses
+    .filter((expense) => expense.status === "pending")
+    .reduce((sum, expense) => sum + expense.amount, 0);
 
   // Events for calendar: calls deadlines + milestone due + meetings + reports
   const events = useMemo(() => {
@@ -160,16 +273,19 @@ export default function ResearcherPortal() {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-4 gap-6">
+        <div className="grid lg:grid-cols-4 gap-6 min-h-screen">
           {/* Sidebar */}
           {/* Sidebar (match admin sidebar primitives) */}
           <aside className="lg:col-span-1">
-            <Sidebar collapsible="none" className="w-full border rounded">
-              <SidebarContent>
-                <SidebarGroup>
+            <Sidebar
+              collapsible="none"
+              className="w-full border rounded h-full"
+            >
+              <SidebarContent className="h-full">
+                <SidebarGroup className="h-full">
                   <SidebarGroupLabel>Researcher</SidebarGroupLabel>
-                  <SidebarGroupContent>
-                    <SidebarMenu>
+                  <SidebarGroupContent className="flex-1">
+                    <SidebarMenu className="h-full">
                       {/* Dashboard */}
                       <SidebarMenuItem>
                         <SidebarMenuButton
@@ -327,74 +443,303 @@ export default function ResearcherPortal() {
 
               {/* Dashboard */}
               <TabsContent value="dashboard">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Dashboard</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <Tabs defaultValue="awards" className="space-y-4">
-                      <TabsList>
-                        <TabsTrigger value="awards">Active Awards</TabsTrigger>
-                        <TabsTrigger value="calls">Open Calls</TabsTrigger>
-                        <TabsTrigger value="deadlines">Deadlines</TabsTrigger>
-                      </TabsList>
+                <div className="space-y-6">
+                  {/* Metrics Cards */}
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {calls.filter((c) => c.status === "Active").length}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Active Calls
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-green-600">
+                          3
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Active Awards
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {events.length}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Upcoming Events
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {milestones.length}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Active Milestones
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
 
-                      <TabsContent value="awards">
-                        <div className="flex items-center justify-between p-3 rounded border">
-                          <div>
-                            <div className="font-medium">
-                              View your active awards
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              Track project progress and details.
-                            </p>
+                  {/* Main Dashboard Content */}
+                  <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {/* Active Awards */}
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <AwardIcon className="h-5 w-5 text-green-600" />
+                          Active Awards
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Track your current research projects and funding
+                        </p>
+                        <div className="space-y-2 mb-4">
+                          <div className="flex justify-between text-sm">
+                            <span>DOE Clean Energy Award</span>
+                            <span className="font-medium">$500,000</span>
                           </div>
+                          <div className="flex justify-between text-sm">
+                            <span>NIH Biomedical Research</span>
+                            <span className="font-medium">$400,000</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>NSF Basic Research</span>
+                            <span className="font-medium">$250,000</span>
+                          </div>
+                        </div>
+                        <Button
+                          className="w-full"
+                          onClick={() => (window.location.href = "/awards")}
+                        >
+                          View All Awards
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Open Calls */}
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <FileText className="h-5 w-5 text-blue-600" />
+                          Open Calls
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Available funding opportunities
+                        </p>
+                        <div className="space-y-2 mb-4">
+                          {calls.slice(0, 3).map((call) => (
+                            <div
+                              key={call.id}
+                              className="flex justify-between items-center text-sm"
+                            >
+                              <div>
+                                <div className="font-medium">{call.funder}</div>
+                                <div className="text-muted-foreground text-xs">
+                                  Due: {call.deadline}
+                                </div>
+                              </div>
+                              <Badge
+                                variant={
+                                  call.status === "Active"
+                                    ? "default"
+                                    : "destructive"
+                                }
+                              >
+                                {call.status}
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                        <Button
+                          className="w-full"
+                          onClick={() => setActiveTab("apply-call")}
+                        >
+                          Browse All Calls
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Upcoming Deadlines */}
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Clock className="h-5 w-5 text-orange-600" />
+                          Upcoming Deadlines
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Important dates and milestones
+                        </p>
+                        <div className="space-y-2 mb-4">
+                          {events.slice(0, 3).map((event, index) => (
+                            <div
+                              key={index}
+                              className="flex justify-between items-center text-sm"
+                            >
+                              <div>
+                                <div className="font-medium">{event.label}</div>
+                                <div className="text-muted-foreground text-xs">
+                                  {event.date}
+                                </div>
+                              </div>
+                              <Badge variant="secondary">{event.type}</Badge>
+                            </div>
+                          ))}
+                        </div>
+                        <Button
+                          className="w-full"
+                          onClick={() => setActiveTab("calendar")}
+                        >
+                          View Calendar
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Active Milestones */}
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Flag className="h-5 w-5 text-purple-600" />
+                          Active Milestones
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Track your project milestones and deliverables
+                        </p>
+                        <div className="space-y-2 mb-4">
+                          {milestones.map((milestone) => (
+                            <div
+                              key={milestone.id}
+                              className="flex justify-between items-center text-sm"
+                            >
+                              <div>
+                                <div className="font-medium">
+                                  {milestone.title}
+                                </div>
+                                <div className="text-muted-foreground text-xs">
+                                  Due: {milestone.due}
+                                </div>
+                              </div>
+                              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+                            </div>
+                          ))}
+                        </div>
+                        <Button
+                          className="w-full"
+                          onClick={() => setActiveTab("add-milestone")}
+                        >
+                          Manage Milestones
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Financial Overview */}
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <DollarSign className="h-5 w-5 text-green-600" />
+                          Financial Overview
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Your funding and spending summary
+                        </p>
+                        <div className="space-y-2 mb-4">
+                          <div className="flex justify-between text-sm">
+                            <span>Total Awarded</span>
+                            <span className="font-medium text-green-600">
+                              $1.2M
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Spent to Date</span>
+                            <span className="font-medium">
+                              ${(approvedExpenses / 1000).toFixed(0)}K
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Pending</span>
+                            <span className="font-medium text-orange-600">
+                              ${(pendingExpenses / 1000).toFixed(0)}K
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span>Remaining</span>
+                            <span className="font-medium text-blue-600">
+                              $
+                              {((1200000 - approvedExpenses) / 1000).toFixed(0)}
+                              K
+                            </span>
+                          </div>
+                        </div>
+                        <Button
+                          className="w-full"
+                          onClick={() => setActiveTab("finance")}
+                        >
+                          View Details
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Quick Actions */}
+                    <Card className="hover:shadow-md transition-shadow cursor-pointer">
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Activity className="h-5 w-5 text-blue-600" />
+                          Quick Actions
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Common tasks and shortcuts
+                        </p>
+                        <div className="space-y-2 mb-4">
                           <Button
-                            onClick={() => (window.location.href = "/awards")}
+                            variant="outline"
+                            size="sm"
+                            className="w-full justify-start"
+                            onClick={() => setActiveTab("new-application")}
                           >
-                            View Active Awards
+                            <FilePlus2 className="h-4 w-4 mr-2" />
+                            New Application
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full justify-start"
+                            onClick={() => setActiveTab("add-award")}
+                          >
+                            <AwardIcon className="h-4 w-4 mr-2" />
+                            Add Award
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="w-full justify-start"
+                            onClick={() => setActiveTab("add-milestone")}
+                          >
+                            <Flag className="h-4 w-4 mr-2" />
+                            Add Milestone
                           </Button>
                         </div>
-                      </TabsContent>
-
-                      <TabsContent value="calls">
-                        <div className="flex items-center justify-between p-3 rounded border">
-                          <div>
-                            <div className="font-medium">
-                              Browse open funding calls
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              Find opportunities to apply.
-                            </p>
-                          </div>
-                          <Button
-                            onClick={() => (window.location.href = "/calls")}
-                          >
-                            Browse Open Calls
-                          </Button>
-                        </div>
-                      </TabsContent>
-
-                      <TabsContent value="deadlines">
-                        <div className="flex items-center justify-between p-3 rounded border">
-                          <div>
-                            <div className="font-medium">
-                              Upcoming deadlines
-                            </div>
-                            <p className="text-sm text-muted-foreground">
-                              See due dates and events.
-                            </p>
-                          </div>
-                          <Button
-                            onClick={() => (window.location.href = "/calendar")}
-                          >
-                            View Deadlines
-                          </Button>
-                        </div>
-                      </TabsContent>
-                    </Tabs>
-                  </CardContent>
-                </Card>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
               </TabsContent>
 
               {/* New Application */}
@@ -405,26 +750,6 @@ export default function ResearcherPortal() {
                     <CardTitle>Start a New Application</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Uploading Box */}
-                    <div>
-                      <Label className="text-sm font-medium mb-2 block">
-                        Upload Supporting Documents
-                      </Label>
-                      <div className="border-2 border-dashed rounded p-4 text-sm text-muted-foreground">
-                        <p className="mb-3">
-                          Drag and drop files here, or click to select files
-                        </p>
-                        <Input
-                          type="file"
-                          multiple
-                          className="cursor-pointer"
-                        />
-                        <p className="mt-2 text-xs">
-                          Accepted: PDF, DOCX, XLSX, ZIP (max 25MB each)
-                        </p>
-                      </div>
-                    </div>
-
                     {/* Application Information */}
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
@@ -465,6 +790,26 @@ export default function ResearcherPortal() {
                         Abstract
                       </Label>
                       <Textarea placeholder="Short summary of the proposed research..." />
+                    </div>
+
+                    {/*upload supporting docs*/}
+                    <div>
+                      <Label className="text-sm font-medium mb-2 block">
+                        Upload Supporting Documents
+                      </Label>
+                      <div className="border-2 border-dashed rounded p-4 text-sm text-muted-foreground">
+                        <p className="mb-3">
+                          Drag and drop files here, or click to select files
+                        </p>
+                        <Input
+                          type="file"
+                          multiple
+                          className="cursor-pointer"
+                        />
+                        <p className="mt-2 text-xs">
+                          Accepted: PDF, DOCX, XLSX, ZIP (max 25MB each)
+                        </p>
+                      </div>
                     </div>
 
                     {/* Guidelines */}
@@ -683,87 +1028,410 @@ export default function ResearcherPortal() {
 
               {/* Financial Reports */}
               <TabsContent value="reports">
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-6">
+                  {/* Financial Overview Cards */}
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-green-600">
+                          $1.2M
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Total Awarded
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-blue-600">
+                          ${(approvedExpenses / 1000).toFixed(0)}K
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Approved Expenses
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-orange-600">
+                          ${(pendingExpenses / 1000).toFixed(0)}K
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Pending Expenses
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-purple-600">
+                          ${((1200000 - approvedExpenses) / 1000).toFixed(0)}K
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Remaining Balance
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Add New Expense */}
                   <Card>
-                    <CardContent className="p-6">
-                      <div className="text-2xl font-bold">$1.2M</div>
-                      <p className="text-sm text-muted-foreground">
-                        Total Awarded
-                      </p>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <DollarSign className="h-5 w-5 text-green-600" />
+                        Add New Expense
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-sm font-medium mb-2 block">
+                            Date *
+                          </Label>
+                          <Input
+                            type="date"
+                            value={newExpense.date}
+                            onChange={(e) =>
+                              setNewExpense({
+                                ...newExpense,
+                                date: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium mb-2 block">
+                            Amount *
+                          </Label>
+                          <Input
+                            type="number"
+                            placeholder="0.00"
+                            value={newExpense.amount}
+                            onChange={(e) =>
+                              setNewExpense({
+                                ...newExpense,
+                                amount: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium mb-2 block">
+                            Purpose *
+                          </Label>
+                          <Input
+                            placeholder="e.g., Lab Equipment, Travel, Software"
+                            value={newExpense.purpose}
+                            onChange={(e) =>
+                              setNewExpense({
+                                ...newExpense,
+                                purpose: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium mb-2 block">
+                            Category *
+                          </Label>
+                          <select
+                            className="w-full h-10 rounded border px-3 text-sm bg-background"
+                            value={newExpense.category}
+                            onChange={(e) =>
+                              setNewExpense({
+                                ...newExpense,
+                                category: e.target.value,
+                              })
+                            }
+                          >
+                            <option value="">Select category</option>
+                            <option value="Equipment">Equipment</option>
+                            <option value="Travel">Travel</option>
+                            <option value="Software">Software</option>
+                            <option value="Supplies">Supplies</option>
+                            <option value="Personnel">Personnel</option>
+                            <option value="Other">Other</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium mb-2 block">
+                            Project (Optional)
+                          </Label>
+                          <Input
+                            placeholder="e.g., DOE-2024-003"
+                            value={newExpense.project}
+                            onChange={(e) =>
+                              setNewExpense({
+                                ...newExpense,
+                                project: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium mb-2 block">
+                            Description (Optional)
+                          </Label>
+                          <Textarea
+                            placeholder="Additional details about this expense..."
+                            value={newExpense.description}
+                            onChange={(e) =>
+                              setNewExpense({
+                                ...newExpense,
+                                description: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button onClick={addExpense}>Add Expense</Button>
+                        <Button
+                          variant="outline"
+                          onClick={() =>
+                            setNewExpense({
+                              date: "",
+                              purpose: "",
+                              amount: "",
+                              category: "",
+                              project: "",
+                              description: "",
+                            })
+                          }
+                        >
+                          Clear
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
+
+                  {/* Expense List */}
                   <Card>
-                    <CardContent className="p-6">
-                      <div className="text-2xl font-bold">$740K</div>
-                      <p className="text-sm text-muted-foreground">
-                        Spent to Date
-                      </p>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5 text-blue-600" />
+                        Expense History
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {expenses.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-8">
+                          No expenses recorded yet. Add your first expense
+                          above.
+                        </p>
+                      ) : (
+                        <div className="space-y-3">
+                          {expenses.map((expense) => (
+                            <div
+                              key={expense.id}
+                              className="border rounded-lg p-4"
+                            >
+                              <div className="flex justify-between items-start">
+                                <div className="space-y-1">
+                                  <div className="font-medium">
+                                    {expense.purpose}
+                                  </div>
+                                  <div className="text-sm text-muted-foreground">
+                                    {expense.date} • {expense.category}
+                                    {expense.project && ` • ${expense.project}`}
+                                  </div>
+                                  {expense.description && (
+                                    <div className="text-sm text-muted-foreground">
+                                      {expense.description}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="text-right space-y-1">
+                                  <div className="font-medium">
+                                    ${expense.amount.toLocaleString()}
+                                  </div>
+                                  <Badge
+                                    variant={
+                                      expense.status === "approved"
+                                        ? "default"
+                                        : expense.status === "pending"
+                                        ? "secondary"
+                                        : "destructive"
+                                    }
+                                  >
+                                    {expense.status}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <div className="flex gap-2 mt-3">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setEditingExpenseId(expense.id)
+                                  }
+                                >
+                                  Edit
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => deleteExpense(expense.id)}
+                                >
+                                  Delete
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
+
+                  {/* Downloadable Reports */}
                   <Card>
-                    <CardContent className="p-6">
-                      <div className="text-2xl font-bold">$460K</div>
-                      <p className="text-sm text-muted-foreground">
-                        Remaining Balance
-                      </p>
+                    <CardHeader>
+                      <CardTitle>Downloadable Reports</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        <BarChart3 className="h-4 w-4 mr-2" /> Quarterly
+                        Financial Report (PDF)
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        <BarChart3 className="h-4 w-4 mr-2" /> Expense Summary
+                        (CSV)
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        <BarChart3 className="h-4 w-4 mr-2" /> Annual Summary
+                        (PDF)
+                      </Button>
                     </CardContent>
                   </Card>
                 </div>
-                <Card className="mt-4">
-                  <CardHeader>
-                    <CardTitle>Downloadable Reports</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start">
-                      <BarChart3 className="h-4 w-4 mr-2" /> Quarterly Financial
-                      Report (PDF)
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <BarChart3 className="h-4 w-4 mr-2" /> Annual Summary
-                      (CSV)
-                    </Button>
-                  </CardContent>
-                </Card>
               </TabsContent>
 
               {/* Finance */}
               <TabsContent value="finance">
-                <div className="grid gap-4 md:grid-cols-3">
+                <div className="space-y-6">
+                  {/* Financial Metrics */}
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-orange-600">
+                          ${(pendingExpenses / 1000).toFixed(0)}K
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Pending Reimbursements
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {
+                            expenses.filter((e) => e.status === "pending")
+                              .length
+                          }
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Pending Approvals
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-green-600">
+                          3
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Active Awards
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Recent Transactions */}
                   <Card>
-                    <CardContent className="p-6">
-                      <div className="text-2xl font-bold">$85K</div>
-                      <p className="text-sm text-muted-foreground">
-                        Pending Reimbursements
-                      </p>
+                    <CardHeader>
+                      <CardTitle>Recent Transactions</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      {expenses.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          No recent transactions to display.
+                        </p>
+                      ) : (
+                        <div className="space-y-3">
+                          {expenses.slice(0, 5).map((expense) => (
+                            <div
+                              key={expense.id}
+                              className="flex justify-between items-center p-3 border rounded"
+                            >
+                              <div>
+                                <div className="font-medium">
+                                  {expense.purpose}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {expense.date} • {expense.category}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <div className="font-medium">
+                                  ${expense.amount.toLocaleString()}
+                                </div>
+                                <Badge
+                                  variant={
+                                    expense.status === "approved"
+                                      ? "default"
+                                      : expense.status === "pending"
+                                      ? "secondary"
+                                      : "destructive"
+                                  }
+                                >
+                                  {expense.status}
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
+
+                  {/* Quick Actions */}
                   <Card>
-                    <CardContent className="p-6">
-                      <div className="text-2xl font-bold">12</div>
-                      <p className="text-sm text-muted-foreground">
-                        Open Purchase Orders
-                      </p>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-6">
-                      <div className="text-2xl font-bold">5</div>
-                      <p className="text-sm text-muted-foreground">
-                        Active Awards
-                      </p>
+                    <CardHeader>
+                      <CardTitle>Quick Actions</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Button
+                        className="w-full justify-start"
+                        onClick={() => setActiveTab("reports")}
+                      >
+                        <DollarSign className="h-4 w-4 mr-2" />
+                        Add New Expense
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        <BarChart3 className="h-4 w-4 mr-2" />
+                        View Financial Reports
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
+                        Download Expense Summary
+                      </Button>
                     </CardContent>
                   </Card>
                 </div>
-                <Card className="mt-4">
-                  <CardHeader>
-                    <CardTitle>Recent Transactions</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      No recent transactions to display.
-                    </p>
-                  </CardContent>
-                </Card>
               </TabsContent>
 
               {/* Calendar */}
