@@ -385,8 +385,8 @@ export default function ResearcherPortal() {
         <link rel="canonical" href={canonical} />
       </Helmet>
 
-      <div className="space-y-4">
-        <div className="grid lg:grid-cols-4 gap-0 min-h-screen">
+      <div className="space-y-6">
+        <div className="grid lg:grid-cols-4 gap-6 min-h-screen">
           {/* Sidebar */}
           {/* Sidebar (match admin sidebar primitives) */}
           <aside className="lg:col-span-1 w-full">
@@ -567,7 +567,7 @@ export default function ResearcherPortal() {
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
-              className="space-y-3"
+              className="space-y-6"
             >
               <TabsList className="hidden" aria-hidden="true">
                 <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
@@ -976,7 +976,7 @@ export default function ResearcherPortal() {
                     </div>
 
                     {/* Add Team Member */}
-                    <div>
+                    {/* <div>
                       <Label className="text-sm font-medium mb-2 block">
                         Add Team Member
                       </Label>
@@ -991,7 +991,7 @@ export default function ResearcherPortal() {
                         Invite collaborators to edit and submit this
                         application.
                       </p>
-                    </div>
+                    </div> */}
 
                     <div className="flex gap-2">
                       <Button>Save Draft</Button>

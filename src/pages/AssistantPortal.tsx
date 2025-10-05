@@ -285,8 +285,8 @@ export default function AssistantPortal() {
         <link rel="canonical" href={canonical} />
       </Helmet>
 
-      <div className="space-y-6">
-        <div className="grid lg:grid-cols-4 gap-0 min-h-screen">
+      <div className=" w-full">
+        <div className="grid lg:grid-cols-4 gap-6 min-h-screen w-full">
           {/* Sidebar */}
           <aside className="lg:col-span-1">
             <Sidebar collapsible="none" className="w-60 border rounded h-full">
@@ -412,206 +412,12 @@ export default function AssistantPortal() {
           </aside>
 
           {/* Content */}
-          <section className="lg:col-span-3">
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-3xl font-semibold tracking-tight">
-                  Assistant Researcher Portal
-                </h1>
-                <p className="text-muted-foreground">
-                  Welcome back. Here's what's happening across your research
-                  projects and assigned work.
-                </p>
-              </div>
-
-              {/* Stats Grid */}
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="text-2xl font-bold text-blue-600">
-                      {openCalls.length}
-                    </div>
-                    <p className="text-sm text-muted-foreground">Open Calls</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="text-2xl font-bold text-green-600">
-                      {assigned.length}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Assigned Projects
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="text-2xl font-bold text-orange-600">
-                      {applications.length}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Applications
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="p-6">
-                    <div className="text-2xl font-bold text-purple-600">
-                      {events.length}
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Upcoming Items
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
-
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Assigned Projects */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Users className="h-5 w-5" />
-                      Assigned Projects
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {assigned.map((a) => (
-                        <div
-                          key={a.id}
-                          className="flex items-center justify-between p-3 border rounded-lg"
-                        >
-                          <div className="space-y-1">
-                            <p className="font-medium text-sm">{a.project}</p>
-                            <p className="text-sm text-muted-foreground">
-                              PI: {a.pi}
-                            </p>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="secondary" className="text-xs">
-                                {a.status}
-                              </Badge>
-                              <Badge variant="outline" className="text-xs">
-                                {a.amount}
-                              </Badge>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold text-sm">
-                              {a.progress}%
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Progress
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <Button variant="outline" className="w-full mt-4">
-                      View All Projects
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Upcoming Deadlines */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <CalendarIcon className="h-5 w-5" />
-                      Upcoming Deadlines
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {events.slice(0, 5).map((e, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between p-3 border rounded-lg"
-                        >
-                          <div className="space-y-1">
-                            <p className="font-medium text-sm">{e.label}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {e.type}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {e.date}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-muted-foreground" />
-                            <Badge
-                              variant={
-                                e.type === "Deadline"
-                                  ? "destructive"
-                                  : "secondary"
-                              }
-                              className="text-xs"
-                            >
-                              {e.type}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <Button variant="outline" className="w-full mt-4">
-                      View Calendar
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Quick Actions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bolt className="h-5 w-5" />
-                    Quick Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <Button
-                      variant="outline"
-                      className="h-auto flex-col gap-2 p-4"
-                      onClick={() => setActiveTab("calls")}
-                    >
-                      <Megaphone className="h-6 w-6" />
-                      <span className="text-sm">Find Calls</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="h-auto flex-col gap-2 p-4"
-                      onClick={() => setActiveTab("applications")}
-                    >
-                      <CalendarDays className="h-6 w-6" />
-                      <span className="text-sm">View Applications</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="h-auto flex-col gap-2 p-4"
-                      onClick={() => setActiveTab("milestones")}
-                    >
-                      <Flag className="h-6 w-6" />
-                      <span className="text-sm">Track Milestones</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="h-auto flex-col gap-2 p-4"
-                      onClick={() => (window.location.href = "/awards")}
-                    >
-                      <ExternalLink className="h-6 w-6" />
-                      <span className="text-sm">Open Awards</span>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
+          <section className="lg:col-span-3 w-full">
             {/* Tabs Content */}
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
-              className="space-y-4"
+              className="space-y-6"
             >
               <TabsList className="hidden" aria-hidden="true">
                 <TabsTrigger value="applications">Applications</TabsTrigger>
@@ -623,13 +429,207 @@ export default function AssistantPortal() {
                 <TabsTrigger value="reports">Reports</TabsTrigger>
               </TabsList>
 
-              {/* Dashboard - Now handled in main layout above */}
+              {/* Dashboard */}
               <TabsContent value="dashboard">
-                <div className="text-center py-12">
-                  <p className="text-muted-foreground">
-                    Dashboard content is now displayed above. Use the navigation
-                    tabs to access other features.
-                  </p>
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-3xl font-semibold tracking-tight">
+                      Assistant Researcher Portal
+                    </h1>
+                    <p className="text-muted-foreground">
+                      Welcome back. Here's what's happening across your research
+                      projects and assigned work.
+                    </p>
+                  </div>
+
+                  {/* Stats Grid */}
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {openCalls.length}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Open Calls
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-green-600">
+                          {assigned.length}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Assigned Projects
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {applications.length}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Applications
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-purple-600">
+                          {events.length}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Upcoming Items
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  <div className="grid gap-6 md:grid-cols-2">
+                    {/* Assigned Projects */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Users className="h-5 w-5" />
+                          Assigned Projects
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {assigned.map((a) => (
+                            <div
+                              key={a.id}
+                              className="flex items-center justify-between p-3 border rounded-lg"
+                            >
+                              <div className="space-y-1">
+                                <p className="font-medium text-sm">
+                                  {a.project}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  PI: {a.pi}
+                                </p>
+                                <div className="flex items-center gap-2">
+                                  <Badge
+                                    variant="secondary"
+                                    className="text-xs"
+                                  >
+                                    {a.status}
+                                  </Badge>
+                                  <Badge variant="outline" className="text-xs">
+                                    {a.amount}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="font-semibold text-sm">
+                                  {a.progress}%
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  Progress
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="w-full mt-4">
+                          View All Projects
+                        </Button>
+                      </CardContent>
+                    </Card>
+
+                    {/* Upcoming Deadlines */}
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <CalendarIcon className="h-5 w-5" />
+                          Upcoming Deadlines
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-4">
+                          {events.slice(0, 5).map((e, i) => (
+                            <div
+                              key={i}
+                              className="flex items-center justify-between p-3 border rounded-lg"
+                            >
+                              <div className="space-y-1">
+                                <p className="font-medium text-sm">{e.label}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  {e.type}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {e.date}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-4 w-4 text-muted-foreground" />
+                                <Badge
+                                  variant={
+                                    e.type === "Deadline"
+                                      ? "destructive"
+                                      : "secondary"
+                                  }
+                                  className="text-xs"
+                                >
+                                  {e.type}
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <Button variant="outline" className="w-full mt-4">
+                          View Calendar
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Quick Actions */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Bolt className="h-5 w-5" />
+                        Quick Actions
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                        <Button
+                          variant="outline"
+                          className="h-auto flex-col gap-2 p-4"
+                          onClick={() => setActiveTab("calls")}
+                        >
+                          <Megaphone className="h-6 w-6" />
+                          <span className="text-sm">Find Calls</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="h-auto flex-col gap-2 p-4"
+                          onClick={() => setActiveTab("applications")}
+                        >
+                          <CalendarDays className="h-6 w-6" />
+                          <span className="text-sm">View Applications</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="h-auto flex-col gap-2 p-4"
+                          onClick={() => setActiveTab("milestones")}
+                        >
+                          <Flag className="h-6 w-6" />
+                          <span className="text-sm">Track Milestones</span>
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="h-auto flex-col gap-2 p-4"
+                          onClick={() => (window.location.href = "/awards")}
+                        >
+                          <ExternalLink className="h-6 w-6" />
+                          <span className="text-sm">Open Awards</span>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </TabsContent>
 
