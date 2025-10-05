@@ -34,6 +34,12 @@ import {
 export default function AssistantPortal() {
   const canonical = typeof window !== "undefined" ? window.location.href : "";
   const [activeTab, setActiveTab] = useState("dashboard");
+  const [selectedTask, setSelectedTask] = useState<string | null>(null);
+  const [taskStatuses, setTaskStatuses] = useState<Record<string, string>>({
+    "T-001": "In Progress",
+    "T-002": "Not Started",
+    "T-003": "Blocked",
+  });
   // Helpers
   const daysUntil = (d: string) =>
     Math.ceil((new Date(d).getTime() - Date.now()) / 86400000);
@@ -46,64 +52,81 @@ export default function AssistantPortal() {
       ? "secondary"
       : "outline";
 
+  // Task management functions
+  const markTaskComplete = (taskId: string) => {
+    setTaskStatuses((prev) => ({
+      ...prev,
+      [taskId]: "Completed",
+    }));
+    alert(`Task ${taskId} marked as completed!`);
+  };
+
+  const viewTaskDetails = (taskId: string) => {
+    setSelectedTask(taskId);
+    alert(`Viewing details for task ${taskId}`);
+  };
+
   // Calls dataset (read-only here)
-  const calls = [
-    {
-      id: "NSF-2024-001",
-      title: "NSF Research Grant Program",
-      funder: "National Science Foundation",
-      theme: "Basic Research",
-      totalFunding: "$5,000,000",
-      maxAward: "$250,000",
-      deadline: "2025-11-15",
-      status: "Active",
-      applications: 45,
-    },
-    {
-      id: "NIH-2024-002",
-      title: "Biomedical Research Excellence",
-      funder: "NIH",
-      theme: "Health & Medicine",
-      totalFunding: "$8,000,000",
-      maxAward: "$400,000",
-      deadline: "2025-10-20",
-      status: "Active",
-      applications: 32,
-    },
-    {
-      id: "DOE-2024-003",
-      title: "Clean Energy Innovation",
-      funder: "DOE",
-      theme: "Energy & Environment",
-      totalFunding: "$10,000,000",
-      maxAward: "$500,000",
-      deadline: "2025-12-10",
-      status: "Active",
-      applications: 28,
-    },
-    {
-      id: "EPA-2024-004",
-      title: "Environmental Sustainability",
-      funder: "EPA",
-      theme: "Environment",
-      totalFunding: "$3,000,000",
-      maxAward: "$150,000",
-      deadline: "2025-10-05",
-      status: "Closing Soon",
-      applications: 67,
-    },
-    {
-      id: "DARPA-2024-005",
-      title: "Defense Research Projects",
-      funder: "DARPA",
-      theme: "Defense & Security",
-      totalFunding: "$15,000,000",
-      maxAward: "$1,000,000",
-      deadline: "2026-01-31",
-      status: "Opening Soon",
-      applications: 0,
-    },
-  ];
+  const calls = useMemo(
+    () => [
+      {
+        id: "NSF-2024-001",
+        title: "NSF Research Grant Program",
+        funder: "National Science Foundation",
+        theme: "Basic Research",
+        totalFunding: "$5,000,000",
+        maxAward: "$250,000",
+        deadline: "2025-11-15",
+        status: "Active",
+        applications: 45,
+      },
+      {
+        id: "NIH-2024-002",
+        title: "Biomedical Research Excellence",
+        funder: "NIH",
+        theme: "Health & Medicine",
+        totalFunding: "$8,000,000",
+        maxAward: "$400,000",
+        deadline: "2025-10-20",
+        status: "Active",
+        applications: 32,
+      },
+      {
+        id: "DOE-2024-003",
+        title: "Clean Energy Innovation",
+        funder: "DOE",
+        theme: "Energy & Environment",
+        totalFunding: "$10,000,000",
+        maxAward: "$500,000",
+        deadline: "2025-12-10",
+        status: "Active",
+        applications: 28,
+      },
+      {
+        id: "EPA-2024-004",
+        title: "Environmental Sustainability",
+        funder: "EPA",
+        theme: "Environment",
+        totalFunding: "$3,000,000",
+        maxAward: "$150,000",
+        deadline: "2025-10-05",
+        status: "Closing Soon",
+        applications: 67,
+      },
+      {
+        id: "DARPA-2024-005",
+        title: "Defense Research Projects",
+        funder: "DARPA",
+        theme: "Defense & Security",
+        totalFunding: "$15,000,000",
+        maxAward: "$1,000,000",
+        deadline: "2026-01-31",
+        status: "Opening Soon",
+        applications: 0,
+      },
+    ],
+    []
+  );
   const [callSearch, setCallSearch] = useState("");
   const [callStatus, setCallStatus] = useState("");
 
@@ -127,38 +150,41 @@ export default function AssistantPortal() {
   }, [filteredCalls]);
 
   // Applications snapshot (visible in Applications tab)
-  const applications = [
-    {
-      id: "APP-001",
-      title: "Coastal Ecosystems",
-      applicant: "Dr. Sarah Johnson",
-      callTitle: "NSF Research Grant Program",
-      requested: "$85,000",
-      submitted: "2025-09-15",
-      deadline: "2025-11-15",
-      status: "Under Review",
-    },
-    {
-      id: "APP-002",
-      title: "AI Drug Discovery",
-      applicant: "Prof. Michael Chen",
-      callTitle: "NIH Biomedical Research Excellence",
-      requested: "$120,000",
-      submitted: "2025-09-12",
-      deadline: "2025-10-20",
-      status: "Approved",
-    },
-    {
-      id: "APP-003",
-      title: "Energy Storage",
-      applicant: "Dr. Emily Rodriguez",
-      callTitle: "DOE Clean Energy Innovation",
-      requested: "$95,000",
-      submitted: "2025-09-10",
-      deadline: "2025-12-10",
-      status: "Needs Revision",
-    },
-  ];
+  const applications = useMemo(
+    () => [
+      {
+        id: "APP-001",
+        title: "Coastal Ecosystems",
+        applicant: "Dr. Sarah Johnson",
+        callTitle: "NSF Research Grant Program",
+        requested: "$85,000",
+        submitted: "2025-09-15",
+        deadline: "2025-11-15",
+        status: "Under Review",
+      },
+      {
+        id: "APP-002",
+        title: "AI Drug Discovery",
+        applicant: "Prof. Michael Chen",
+        callTitle: "NIH Biomedical Research Excellence",
+        requested: "$120,000",
+        submitted: "2025-09-12",
+        deadline: "2025-10-20",
+        status: "Approved",
+      },
+      {
+        id: "APP-003",
+        title: "Energy Storage",
+        applicant: "Dr. Emily Rodriguez",
+        callTitle: "DOE Clean Energy Innovation",
+        requested: "$95,000",
+        submitted: "2025-09-10",
+        deadline: "2025-12-10",
+        status: "Needs Revision",
+      },
+    ],
+    []
+  );
   const pendingApps = applications.filter((a) =>
     ["Submitted", "Under Review"].includes(a.status)
   );
@@ -260,191 +286,15 @@ export default function AssistantPortal() {
       </Helmet>
 
       <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">
-            Assistant Researcher Portal
-          </h1>
-          <p className="text-muted-foreground">
-            Welcome back. Here's what's happening across your research projects
-            and assigned work.
-          </p>
-        </div>
-
-        {/* Stats Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardContent className="p-6">
-              <div className="text-2xl font-bold text-blue-600">
-                {openCalls.length}
-              </div>
-              <p className="text-sm text-muted-foreground">Open Calls</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="text-2xl font-bold text-green-600">
-                {assigned.length}
-              </div>
-              <p className="text-sm text-muted-foreground">Assigned Projects</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="text-2xl font-bold text-orange-600">
-                {applications.length}
-              </div>
-              <p className="text-sm text-muted-foreground">Applications</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="text-2xl font-bold text-purple-600">
-                {events.length}
-              </div>
-              <p className="text-sm text-muted-foreground">Upcoming Items</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Assigned Projects */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5" />
-                Assigned Projects
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {assigned.map((a) => (
-                  <div
-                    key={a.id}
-                    className="flex items-center justify-between p-3 border rounded-lg"
-                  >
-                    <div className="space-y-1">
-                      <p className="font-medium text-sm">{a.project}</p>
-                      <p className="text-sm text-muted-foreground">
-                        PI: {a.pi}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="text-xs">
-                          {a.status}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          {a.amount}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-sm">{a.progress}%</p>
-                      <p className="text-xs text-muted-foreground">Progress</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Button variant="outline" className="w-full mt-4">
-                View All Projects
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Upcoming Deadlines */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <CalendarIcon className="h-5 w-5" />
-                Upcoming Deadlines
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {events.slice(0, 5).map((e, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between p-3 border rounded-lg"
-                  >
-                    <div className="space-y-1">
-                      <p className="font-medium text-sm">{e.label}</p>
-                      <p className="text-sm text-muted-foreground">{e.type}</p>
-                      <p className="text-xs text-muted-foreground">{e.date}</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <Badge
-                        variant={
-                          e.type === "Deadline" ? "destructive" : "secondary"
-                        }
-                        className="text-xs"
-                      >
-                        {e.type}
-                      </Badge>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Button variant="outline" className="w-full mt-4">
-                View Calendar
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bolt className="h-5 w-5" />
-              Quick Actions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <Button
-                variant="outline"
-                className="h-auto flex-col gap-2 p-4"
-                onClick={() => setActiveTab("calls")}
-              >
-                <Megaphone className="h-6 w-6" />
-                <span className="text-sm">Find Calls</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto flex-col gap-2 p-4"
-                onClick={() => setActiveTab("applications")}
-              >
-                <CalendarDays className="h-6 w-6" />
-                <span className="text-sm">View Applications</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto flex-col gap-2 p-4"
-                onClick={() => setActiveTab("milestones")}
-              >
-                <Flag className="h-6 w-6" />
-                <span className="text-sm">Track Milestones</span>
-              </Button>
-              <Button
-                variant="outline"
-                className="h-auto flex-col gap-2 p-4"
-                onClick={() => (window.location.href = "/awards")}
-              >
-                <ExternalLink className="h-6 w-6" />
-                <span className="text-sm">Open Awards</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <div className="grid lg:grid-cols-4 gap-6">
+        <div className="grid lg:grid-cols-4 gap-0 min-h-screen">
           {/* Sidebar */}
-          <aside className="lg:col-span-1 w-full">
-            <Sidebar collapsible="none" className="w-full border rounded">
-              <SidebarContent>
-                <SidebarGroup>
+          <aside className="lg:col-span-1">
+            <Sidebar collapsible="none" className="w-60 border rounded h-full">
+              <SidebarContent className="h-full">
+                <SidebarGroup className="h-full">
                   <SidebarGroupLabel>Assistant Researcher</SidebarGroupLabel>
-                  <SidebarGroupContent>
-                    <SidebarMenu>
+                  <SidebarGroupContent className="flex-1">
+                    <SidebarMenu className="h-full">
                       <SidebarMenuItem>
                         <SidebarMenuButton
                           asChild
@@ -524,7 +374,21 @@ export default function AssistantPortal() {
                           </button>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
-
+                      <SidebarMenuItem>
+                        <SidebarMenuButton
+                          asChild
+                          data-active={activeTab === "assignments"}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab("assignments")}
+                            className="w-full text-left flex items-center gap-2"
+                          >
+                            <BarChart3 className="h-4 w-4" />
+                            <span>Assignments</span>
+                          </button>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
                       <SidebarMenuItem>
                         <SidebarMenuButton
                           asChild
@@ -549,6 +413,201 @@ export default function AssistantPortal() {
 
           {/* Content */}
           <section className="lg:col-span-3">
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-3xl font-semibold tracking-tight">
+                  Assistant Researcher Portal
+                </h1>
+                <p className="text-muted-foreground">
+                  Welcome back. Here's what's happening across your research
+                  projects and assigned work.
+                </p>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {openCalls.length}
+                    </div>
+                    <p className="text-sm text-muted-foreground">Open Calls</p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-2xl font-bold text-green-600">
+                      {assigned.length}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Assigned Projects
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-2xl font-bold text-orange-600">
+                      {applications.length}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Applications
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="text-2xl font-bold text-purple-600">
+                      {events.length}
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Upcoming Items
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                {/* Assigned Projects */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Users className="h-5 w-5" />
+                      Assigned Projects
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {assigned.map((a) => (
+                        <div
+                          key={a.id}
+                          className="flex items-center justify-between p-3 border rounded-lg"
+                        >
+                          <div className="space-y-1">
+                            <p className="font-medium text-sm">{a.project}</p>
+                            <p className="text-sm text-muted-foreground">
+                              PI: {a.pi}
+                            </p>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary" className="text-xs">
+                                {a.status}
+                              </Badge>
+                              <Badge variant="outline" className="text-xs">
+                                {a.amount}
+                              </Badge>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-sm">
+                              {a.progress}%
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              Progress
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <Button variant="outline" className="w-full mt-4">
+                      View All Projects
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Upcoming Deadlines */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CalendarIcon className="h-5 w-5" />
+                      Upcoming Deadlines
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {events.slice(0, 5).map((e, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center justify-between p-3 border rounded-lg"
+                        >
+                          <div className="space-y-1">
+                            <p className="font-medium text-sm">{e.label}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {e.type}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {e.date}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <Badge
+                              variant={
+                                e.type === "Deadline"
+                                  ? "destructive"
+                                  : "secondary"
+                              }
+                              className="text-xs"
+                            >
+                              {e.type}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <Button variant="outline" className="w-full mt-4">
+                      View Calendar
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bolt className="h-5 w-5" />
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <Button
+                      variant="outline"
+                      className="h-auto flex-col gap-2 p-4"
+                      onClick={() => setActiveTab("calls")}
+                    >
+                      <Megaphone className="h-6 w-6" />
+                      <span className="text-sm">Find Calls</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-auto flex-col gap-2 p-4"
+                      onClick={() => setActiveTab("applications")}
+                    >
+                      <CalendarDays className="h-6 w-6" />
+                      <span className="text-sm">View Applications</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-auto flex-col gap-2 p-4"
+                      onClick={() => setActiveTab("milestones")}
+                    >
+                      <Flag className="h-6 w-6" />
+                      <span className="text-sm">Track Milestones</span>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="h-auto flex-col gap-2 p-4"
+                      onClick={() => (window.location.href = "/awards")}
+                    >
+                      <ExternalLink className="h-6 w-6" />
+                      <span className="text-sm">Open Awards</span>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Tabs Content */}
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
@@ -560,6 +619,7 @@ export default function AssistantPortal() {
                 <TabsTrigger value="calls">Calls</TabsTrigger>
                 <TabsTrigger value="calendar">Calendar</TabsTrigger>
                 <TabsTrigger value="milestones">Milestones</TabsTrigger>
+                <TabsTrigger value="assignments">Assignments</TabsTrigger>
                 <TabsTrigger value="reports">Reports</TabsTrigger>
               </TabsList>
 
@@ -981,6 +1041,132 @@ export default function AssistantPortal() {
                             </div>
                           </CardContent>
                         </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Assignments */}
+              <TabsContent value="assignments">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>My Assignments</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Demo tasks assigned by researcher */}
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {/* Task cards */}
+                      {[
+                        {
+                          id: "T-001",
+                          title: "Draft methodology section",
+                          project: "AI-Driven Drug Discovery Platform",
+                          due: "2025-10-28",
+                          priority: "High",
+                          status: "In Progress",
+                          description:
+                            "Outline data pipeline, model selection rationale, and evaluation metrics.",
+                          tags: ["Writing", "ML"],
+                        },
+                        {
+                          id: "T-002",
+                          title: "Literature review on coastal impacts",
+                          project:
+                            "Climate Change Impact on Coastal Ecosystems",
+                          due: "2025-11-02",
+                          priority: "Normal",
+                          status: "Not Started",
+                          description:
+                            "Summarize top 10 recent papers and extract datasets used.",
+                          tags: ["Review", "Data"],
+                        },
+                        {
+                          id: "T-003",
+                          title: "Prepare budget revision",
+                          project: "Renewable Energy Storage Solutions",
+                          due: "2025-11-10",
+                          priority: "High",
+                          status: "Blocked",
+                          description:
+                            "Update equipment line items and add vendor quotes.",
+                          tags: ["Finance", "Docs"],
+                        },
+                      ].map((t) => (
+                        <div
+                          key={t.id}
+                          className="p-4 border rounded-lg hover:shadow-sm transition-shadow"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{t.title}</span>
+                                <Badge
+                                  variant={
+                                    t.priority === "High"
+                                      ? "destructive"
+                                      : "secondary"
+                                  }
+                                  className="text-xs"
+                                >
+                                  {t.priority}
+                                </Badge>
+                              </div>
+                              <div className="text-sm text-muted-foreground">
+                                {t.project}
+                              </div>
+                            </div>
+                            <div className="text-right space-y-1">
+                              <Badge
+                                variant={
+                                  taskStatuses[t.id] === "In Progress"
+                                    ? "default"
+                                    : taskStatuses[t.id] === "Blocked"
+                                    ? "destructive"
+                                    : taskStatuses[t.id] === "Completed"
+                                    ? "default"
+                                    : "outline"
+                                }
+                                className="text-xs"
+                              >
+                                {taskStatuses[t.id]}
+                              </Badge>
+                              <div className="text-xs text-muted-foreground">
+                                Due {t.due}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-3 text-sm">{t.description}</div>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {t.tags.map((tag) => (
+                              <Badge
+                                key={tag}
+                                variant="outline"
+                                className="text-xs"
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                          <div className="mt-3 flex items-center gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => viewTaskDetails(t.id)}
+                            >
+                              View Details
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => markTaskComplete(t.id)}
+                              disabled={taskStatuses[t.id] === "Completed"}
+                            >
+                              {taskStatuses[t.id] === "Completed"
+                                ? "Completed"
+                                : "Mark Complete"}
+                            </Button>
+                          </div>
+                        </div>
                       ))}
                     </div>
                   </CardContent>

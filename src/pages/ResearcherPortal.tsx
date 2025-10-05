@@ -178,6 +178,129 @@ export default function ResearcherPortal() {
 
   const [editingExpenseId, setEditingExpenseId] = useState<string | null>(null);
 
+  // Assistant management
+  type Assistant = {
+    id: string;
+    name: string;
+    email: string;
+    expertise: string[];
+    assignedApplications: string[];
+    status: "available" | "assigned" | "busy";
+  };
+
+  const [assistants, setAssistants] = useState<Assistant[]>([
+    {
+      id: "AST-001",
+      name: "Dr. Sarah Wilson",
+      email: "sarah.wilson@university.edu",
+      expertise: ["Data Analysis", "Grant Writing", "Research Methodology"],
+      assignedApplications: ["APP-001"],
+      status: "assigned",
+    },
+    {
+      id: "AST-002",
+      name: "Prof. Michael Chen",
+      email: "michael.chen@university.edu",
+      expertise: ["Biostatistics", "Clinical Research", "Protocol Development"],
+      assignedApplications: [],
+      status: "available",
+    },
+    {
+      id: "AST-003",
+      name: "Dr. Emily Rodriguez",
+      email: "emily.rodriguez@university.edu",
+      expertise: [
+        "Literature Review",
+        "Technical Writing",
+        "Project Management",
+      ],
+      assignedApplications: ["APP-002"],
+      status: "assigned",
+    },
+  ]);
+
+  const [selectedApplication, setSelectedApplication] = useState<string>("");
+  const [selectedAssistant, setSelectedAssistant] = useState<string>("");
+
+  // Sample applications for assignment
+  const availableApplications = [
+    {
+      id: "APP-001",
+      title: "Climate Change Impact Study",
+      status: "Under Review",
+      deadline: "2025-11-15",
+      assignedAssistant: "Dr. Sarah Wilson",
+      projectStatus: "In Progress",
+      progress: 65,
+    },
+    {
+      id: "APP-002",
+      title: "AI Drug Discovery Platform",
+      status: "In Progress",
+      deadline: "2025-12-10",
+      assignedAssistant: "Dr. Emily Rodriguez",
+      projectStatus: "In Progress",
+      progress: 45,
+    },
+    {
+      id: "APP-003",
+      title: "Renewable Energy Research",
+      status: "Planning",
+      deadline: "2025-10-30",
+      assignedAssistant: null,
+      projectStatus: "Not Started",
+      progress: 0,
+    },
+  ];
+
+  // Assistant management functions
+  const assignAssistant = () => {
+    if (!selectedApplication || !selectedAssistant) {
+      alert("Please select both an application and an assistant");
+      return;
+    }
+
+    setAssistants(
+      assistants.map((assistant) =>
+        assistant.id === selectedAssistant
+          ? {
+              ...assistant,
+              assignedApplications: [
+                ...assistant.assignedApplications,
+                selectedApplication,
+              ],
+              status: "assigned",
+            }
+          : assistant
+      )
+    );
+
+    setSelectedApplication("");
+    setSelectedAssistant("");
+  };
+
+  const removeAssistantAssignment = (
+    assistantId: string,
+    applicationId: string
+  ) => {
+    setAssistants(
+      assistants.map((assistant) =>
+        assistant.id === assistantId
+          ? {
+              ...assistant,
+              assignedApplications: assistant.assignedApplications.filter(
+                (id) => id !== applicationId
+              ),
+              status:
+                assistant.assignedApplications.length === 1
+                  ? "available"
+                  : "assigned",
+            }
+          : assistant
+      )
+    );
+  };
+
   // Expense management functions
   const addExpense = () => {
     if (
@@ -262,8 +385,8 @@ export default function ResearcherPortal() {
         <link rel="canonical" href={canonical} />
       </Helmet>
 
-      <div className="space-y-6">
-        <div className="grid lg:grid-cols-4 gap-6 min-h-screen">
+      <div className="space-y-4">
+        <div className="grid lg:grid-cols-4 gap-0 min-h-screen">
           {/* Sidebar */}
           {/* Sidebar (match admin sidebar primitives) */}
           <aside className="lg:col-span-1 w-full">
@@ -401,6 +524,37 @@ export default function ResearcherPortal() {
                           </button>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
+
+                      <SidebarMenuItem>
+                        <SidebarMenuButton
+                          asChild
+                          data-active={activeTab === "add-assistant"}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab("add-assistant")}
+                            className="w-full text-left flex items-center gap-2"
+                          >
+                            <Users className="h-4 w-4" />
+                            <span>Add Assistant</span>
+                          </button>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton
+                          asChild
+                          data-active={activeTab === "assign-task"}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => setActiveTab("assign-task")}
+                            className="w-full text-left flex items-center gap-2"
+                          >
+                            <Users className="h-4 w-4" />
+                            <span>Assign Task</span>
+                          </button>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
                     </SidebarMenu>
                   </SidebarGroupContent>
                 </SidebarGroup>
@@ -413,7 +567,7 @@ export default function ResearcherPortal() {
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}
-              className="space-y-4"
+              className="space-y-3"
             >
               <TabsList className="hidden" aria-hidden="true">
                 <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
@@ -426,6 +580,8 @@ export default function ResearcherPortal() {
                 <TabsTrigger value="finance">Finance</TabsTrigger>
                 <TabsTrigger value="calendar">Calendar</TabsTrigger>
                 <TabsTrigger value="add-milestone">Add Milestone</TabsTrigger>
+                <TabsTrigger value="add-assistant">Add Assistant</TabsTrigger>
+                <TabsTrigger value="assign-task">Assign Task</TabsTrigger>
               </TabsList>
 
               {/* Dashboard */}
@@ -1596,6 +1752,484 @@ export default function ResearcherPortal() {
                     </div>
                   </CardContent>
                 </Card>
+              </TabsContent>
+
+              {/* Add Assistant */}
+              <TabsContent value="add-assistant">
+                <div className="space-y-6">
+                  {/* Assignment Section */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="h-5 w-5 text-blue-600" />
+                        Assign Assistant to Application
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        <div>
+                          <Label className="text-sm font-medium mb-2 block">
+                            Select Application
+                          </Label>
+                          <select
+                            className="w-full h-10 rounded border px-3 text-sm bg-background"
+                            value={selectedApplication}
+                            onChange={(e) =>
+                              setSelectedApplication(e.target.value)
+                            }
+                          >
+                            <option value="">Choose an application...</option>
+                            {availableApplications.map((app) => (
+                              <option key={app.id} value={app.id}>
+                                {app.title} ({app.status})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium mb-2 block">
+                            Select Assistant
+                          </Label>
+                          <select
+                            className="w-full h-10 rounded border px-3 text-sm bg-background"
+                            value={selectedAssistant}
+                            onChange={(e) =>
+                              setSelectedAssistant(e.target.value)
+                            }
+                          >
+                            <option value="">Choose an assistant...</option>
+                            {assistants
+                              .filter((a) => a.status !== "busy")
+                              .map((assistant) => (
+                                <option key={assistant.id} value={assistant.id}>
+                                  {assistant.name} ({assistant.status})
+                                </option>
+                              ))}
+                          </select>
+                        </div>
+                      </div>
+                      <Button onClick={assignAssistant} className="w-full">
+                        Assign Assistant
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* Applications List */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Available Applications</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        {availableApplications.map((app) => (
+                          <div key={app.id} className="border rounded-lg p-4">
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-1">
+                                <div className="font-medium">{app.title}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  ID: {app.id} • Status: {app.status} •
+                                  Deadline: {app.deadline}
+                                </div>
+                                {app.assignedAssistant && (
+                                  <div className="text-sm text-green-600">
+                                    Assigned to: {app.assignedAssistant}
+                                  </div>
+                                )}
+                              </div>
+                              <Badge
+                                variant={
+                                  app.assignedAssistant
+                                    ? "default"
+                                    : "secondary"
+                                }
+                              >
+                                {app.assignedAssistant
+                                  ? "Assigned"
+                                  : "Available"}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Assistants List */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Assistant Researchers</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {assistants.map((assistant) => (
+                          <div
+                            key={assistant.id}
+                            className="border rounded-lg p-4"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-2 flex-1">
+                                <div className="font-medium">
+                                  {assistant.name}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {assistant.email}
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                  {assistant.expertise.map((skill, index) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {skill}
+                                    </Badge>
+                                  ))}
+                                </div>
+                                {assistant.assignedApplications.length > 0 && (
+                                  <div className="text-sm">
+                                    <div className="font-medium mb-1">
+                                      Assigned Applications:
+                                    </div>
+                                    <div className="space-y-1">
+                                      {assistant.assignedApplications.map(
+                                        (appId) => {
+                                          const app =
+                                            availableApplications.find(
+                                              (a) => a.id === appId
+                                            );
+                                          return (
+                                            <div
+                                              key={appId}
+                                              className="flex items-center justify-between bg-muted p-2 rounded text-xs"
+                                            >
+                                              <div className="flex-1">
+                                                <div className="font-medium">
+                                                  {app?.title || appId}
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                  <Badge
+                                                    variant={
+                                                      app?.projectStatus ===
+                                                      "In Progress"
+                                                        ? "default"
+                                                        : app?.projectStatus ===
+                                                          "Completed"
+                                                        ? "default"
+                                                        : "secondary"
+                                                    }
+                                                    className="text-xs"
+                                                  >
+                                                    {app?.projectStatus}
+                                                  </Badge>
+                                                  <div className="text-xs text-muted-foreground">
+                                                    {app?.progress}% complete
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <Button
+                                                size="sm"
+                                                variant="destructive"
+                                                onClick={() =>
+                                                  removeAssistantAssignment(
+                                                    assistant.id,
+                                                    appId
+                                                  )
+                                                }
+                                              >
+                                                Remove
+                                              </Button>
+                                            </div>
+                                          );
+                                        }
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="text-right">
+                                <Badge
+                                  variant={
+                                    assistant.status === "available"
+                                      ? "default"
+                                      : assistant.status === "assigned"
+                                      ? "secondary"
+                                      : "destructive"
+                                  }
+                                >
+                                  {assistant.status}
+                                </Badge>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {assistant.assignedApplications.length}{" "}
+                                  assigned
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Quick Stats */}
+                  <div className="grid gap-4 md:grid-cols-3">
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {assistants.length}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Total Assistants
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-green-600">
+                          {
+                            assistants.filter((a) => a.status === "available")
+                              .length
+                          }
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Available
+                        </p>
+                      </CardContent>
+                    </Card>
+                    <Card>
+                      <CardContent className="p-6">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {
+                            assistants.filter((a) => a.status === "assigned")
+                              .length
+                          }
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          Assigned
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Assign Task */}
+              <TabsContent value="assign-task">
+                <div className="space-y-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Users className="h-5 w-5 text-blue-600" />
+                        Assign Task to Assistant Researcher
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div className="rounded border p-4 space-y-3">
+                        <div className="grid md:grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-sm font-medium mb-2 block">
+                              Assistant
+                            </Label>
+                            <select
+                              className="w-full h-10 rounded border px-3 text-sm bg-background"
+                              value={selectedAssistant}
+                              onChange={(e) =>
+                                setSelectedAssistant(e.target.value)
+                              }
+                            >
+                              <option value="">Choose assistant...</option>
+                              {assistants.map((a) => (
+                                <option key={a.id} value={a.id}>
+                                  {a.name} ({a.status})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium mb-2 block">
+                              Project
+                            </Label>
+                            <select
+                              className="w-full h-10 rounded border px-3 text-sm bg-background"
+                              value={selectedApplication}
+                              onChange={(e) =>
+                                setSelectedApplication(e.target.value)
+                              }
+                            >
+                              <option value="">
+                                Choose project/application...
+                              </option>
+                              {availableApplications.map((app) => (
+                                <option key={app.id} value={app.id}>
+                                  {app.title} ({app.status})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-sm font-medium mb-2 block">
+                              Task Title
+                            </Label>
+                            <Input placeholder="e.g., Draft methodology section" />
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium mb-2 block">
+                              Due Date
+                            </Label>
+                            <Input type="date" />
+                          </div>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-medium mb-2 block">
+                            Details
+                          </Label>
+                          <Textarea placeholder="Describe the task, resources, and expectations..." />
+                        </div>
+                        <div className="grid md:grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-sm font-medium mb-2 block">
+                              Priority
+                            </Label>
+                            <select className="w-full h-10 rounded border px-3 text-sm bg-background">
+                              <option>Normal</option>
+                              <option>High</option>
+                              <option>Low</option>
+                            </select>
+                          </div>
+                          <div>
+                            <Label className="text-sm font-medium mb-2 block">
+                              Attachment (optional)
+                            </Label>
+                            <Input type="file" className="cursor-pointer" />
+                          </div>
+                        </div>
+                        <Button onClick={() => alert("Task assigned (demo)")}>
+                          Assign Task
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Assistant Researchers</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        {assistants.map((assistant) => (
+                          <div
+                            key={assistant.id}
+                            className="border rounded-lg p-4"
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="space-y-2 flex-1">
+                                <div className="font-medium">
+                                  {assistant.name}
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                  {assistant.email}
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                  {assistant.expertise.map((skill, index) => (
+                                    <Badge
+                                      key={index}
+                                      variant="outline"
+                                      className="text-xs"
+                                    >
+                                      {skill}
+                                    </Badge>
+                                  ))}
+                                </div>
+                                <div className="text-sm">
+                                  <div className="font-medium mb-1">
+                                    Projects Assisting On:
+                                  </div>
+                                  {assistant.assignedApplications.length ===
+                                  0 ? (
+                                    <div className="text-xs text-muted-foreground">
+                                      None yet
+                                    </div>
+                                  ) : (
+                                    <div className="space-y-1">
+                                      {assistant.assignedApplications.map(
+                                        (appId) => {
+                                          const app =
+                                            availableApplications.find(
+                                              (a) => a.id === appId
+                                            );
+                                          return (
+                                            <div
+                                              key={appId}
+                                              className="flex items-center justify-between bg-muted p-2 rounded text-xs"
+                                            >
+                                              <div className="flex-1">
+                                                <div className="font-medium">
+                                                  {app?.title || appId}
+                                                </div>
+                                                <div className="flex items-center gap-2 mt-1">
+                                                  <Badge
+                                                    variant={
+                                                      app?.projectStatus ===
+                                                      "In Progress"
+                                                        ? "default"
+                                                        : app?.projectStatus ===
+                                                          "Completed"
+                                                        ? "default"
+                                                        : "secondary"
+                                                    }
+                                                    className="text-xs"
+                                                  >
+                                                    {app?.projectStatus}
+                                                  </Badge>
+                                                  <div className="text-xs text-muted-foreground">
+                                                    {app?.progress}% complete
+                                                  </div>
+                                                </div>
+                                              </div>
+                                              <Button
+                                                size="sm"
+                                                variant="outline"
+                                                onClick={() =>
+                                                  setSelectedAssistant(
+                                                    assistant.id
+                                                  )
+                                                }
+                                              >
+                                                Assign Task
+                                              </Button>
+                                            </div>
+                                          );
+                                        }
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <Badge
+                                  variant={
+                                    assistant.status === "available"
+                                      ? "default"
+                                      : assistant.status === "assigned"
+                                      ? "secondary"
+                                      : "destructive"
+                                  }
+                                >
+                                  {assistant.status}
+                                </Badge>
+                                <div className="text-xs text-muted-foreground mt-1">
+                                  {assistant.assignedApplications.length}{" "}
+                                  assigned
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
               </TabsContent>
             </Tabs>
           </section>
